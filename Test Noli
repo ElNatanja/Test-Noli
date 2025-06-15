@@ -1,0 +1,199 @@
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+
+local R6PartNames = {
+	["Head"] = true,
+	["Torso"] = true,
+	["Left Arm"] = true,
+	["Right Arm"] = true,
+	["Left Leg"] = true,
+	["Right Leg"] = true,
+	["HumanoidRootPart"] = true
+}
+
+local meshAttachmentMap = {
+	["NoliHead"] = "Head",
+	["NoliLeft Arm"] = "Left Arm",
+	["NoliLeft Leg"] = "Left Leg",
+	["NoliLower Skull"] = "Head",
+	["NoliRight Arm"] = "Right Arm",
+	["NoliRight Leg"] = "Right Leg",
+	["NoliTorso"] = "Torso",
+	["Voidstar"] = "Right Arm",
+	["VoidstarCrown"] = "Head"
+}
+
+local headOffsets = {
+	["NoliLower Skull"] = CFrame.new(0, -0.25, 0),
+	["VoidstarCrown"] = CFrame.new(0, 1.05, 0),
+	["NoliHead"] = CFrame.new(0.3, 0, 0),
+	["Voidstar"] = CFrame.new(-0.8, -1.5, -0.5)
+}
+
+local voidstarMotor = nil
+local voidstarOriginal = nil
+local voidstarThrown = nil
+local launching = false
+
+local soundId = "rbxassetid://99558901806521"
+
+local function weldAccessory(partToAttach, accessory)
+	if accessory.Name == "Voidstar" then
+		local motor = Instance.new("Motor6D")
+		motor.Name = "VoidstarMotor6D"
+		motor.Part0 = partToAttach
+		motor.Part1 = accessory
+		motor.C0 = headOffsets[accessory.Name] or CFrame.new()
+		motor.C1 = CFrame.new()
+		motor.Parent = partToAttach
+		voidstarMotor = motor
+
+		accessory.Anchored = false
+		accessory.CanCollide = false
+		accessory.Parent = character
+		voidstarOriginal = accessory
+	else
+		local weld = Instance.new("Weld")
+		weld.Part0 = partToAttach
+		weld.Part1 = accessory
+
+		local offset = headOffsets[accessory.Name] or CFrame.new()
+		weld.C0 = offset
+		weld.Parent = accessory
+
+		accessory.Anchored = false
+		accessory.CanCollide = false
+		accessory.Parent = character
+	end
+end
+
+local function attachToCharacter(character, accessory)
+	local attachName = meshAttachmentMap[accessory.Name]
+	if not attachName then return end
+
+	local targetPart = character:FindFirstChild(attachName)
+	if not targetPart then return end
+
+	weldAccessory(targetPart, accessory)
+end
+
+local function findNearestPlayer(position)
+	local closest, minDist = nil, math.huge
+	for _, otherPlayer in ipairs(Players:GetPlayers()) do
+		if otherPlayer ~= player and otherPlayer.Character and otherPlayer.Character:FindFirstChild("HumanoidRootPart") then
+			local dist = (otherPlayer.Character.HumanoidRootPart.Position - position).Magnitude
+			if dist < minDist then
+				minDist = dist
+				closest = otherPlayer
+			end
+		end
+	end
+	return closest
+end
+
+local function reallyLaunchVoidstar()
+	local hrp = character:FindFirstChild("HumanoidRootPart")
+	if not hrp or not voidstarOriginal or not voidstarOriginal.Parent then return end
+
+	local clone = voidstarOriginal:Clone()
+	clone.Anchored = false
+	clone.CanCollide = false
+	clone.Transparency = 1
+	clone.Parent = workspace
+	clone.CFrame = voidstarOriginal.CFrame
+	voidstarThrown = clone
+
+	voidstarOriginal.Transparency = 1
+	if voidstarMotor then
+		voidstarMotor:Destroy()
+		voidstarMotor = nil
+	end
+
+	task.delay(2, function()
+		if clone and clone.Parent then
+			clone.Transparency = 0
+		end
+	end)
+
+	local targetPlayer = findNearestPlayer(hrp.Position)
+	if not targetPlayer or not targetPlayer.Character or not targetPlayer.Character:FindFirstChild("HumanoidRootPart") then return end
+
+	local targetPosition = targetPlayer.Character.HumanoidRootPart.Position
+	local direction = (targetPosition - clone.Position).Unit
+	local bodyVelocity = Instance.new("BodyVelocity")
+	bodyVelocity.Velocity = direction * 35
+	bodyVelocity.MaxForce = Vector3.new(1, 1, 1) * math.huge
+	bodyVelocity.Parent = clone
+
+	local rotating = true
+	task.spawn(function()
+		local speed = 0
+		local accelerating = true
+		while clone and clone.Parent and rotating do
+			RunService.RenderStepped:Wait()
+			if accelerating then
+				speed = math.min(speed + 1, 40)
+				if speed >= 40 then accelerating = false end
+			else
+				speed = math.max(speed - 0.5, 0)
+				if speed <= 0 then rotating = false end
+			end
+			clone.CFrame = clone.CFrame * CFrame.Angles(0, math.rad(speed), 0)
+		end
+	end)
+
+	task.delay(0.1, function()
+		if clone and clone.Parent then
+			local connection
+			connection = clone.Touched:Connect(function(hit)
+				local touchedPlayer = Players:GetPlayerFromCharacter(hit.Parent)
+				if touchedPlayer ~= player then
+					if clone then
+						clone:Destroy()
+						voidstarThrown = nil
+						local sound = Instance.new("Sound", workspace)
+						sound.SoundId = soundId
+						sound:Play()
+						game.Debris:AddItem(sound, 2)
+					end
+					connection:Disconnect()
+				end
+			end)
+		end
+	end)
+end
+
+local function launchVoidstar()
+	if launching or not voidstarOriginal or not voidstarOriginal.Parent then return end
+	launching = true
+	task.delay(1, function()
+		reallyLaunchVoidstar()
+		launching = false
+	end)
+end
+
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+	if gameProcessed then return end
+	if input.KeyCode == Enum.KeyCode.E then
+		launchVoidstar()
+	end
+end)
+
+for _, descendant in pairs(ReplicatedStorage:WaitForChild("Rig2"):GetDescendants()) do
+	if descendant:IsA("MeshPart") or descendant:IsA("Part") then
+		if R6PartNames[descendant.Name] then continue end
+		local clone = descendant:Clone()
+		attachToCharacter(character, clone)
+	elseif descendant:IsA("Attachment") and descendant.Name == "ShadowPuddle" then
+		local targetHRP = character:FindFirstChild("HumanoidRootPart")
+		if targetHRP then
+			local puddle = descendant:Clone()
+			puddle.Parent = targetHRP
+		end
+	end
+end
