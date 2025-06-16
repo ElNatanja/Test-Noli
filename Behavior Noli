@@ -1,0 +1,1638 @@
+-- Decompiler will be improved VERY SOON!
+-- Decompiled with Konstant V2.1, a fast Luau decompiler made in Luau by plusgiant5 (https://discord.gg/brNTY8nX8t)
+-- Decompiled on 2025-06-14 06:06:28
+-- Luau version 6, Types version 3
+-- Time taken: 0.056417 seconds
+
+local ReplicatedStorage_upvr = game:GetService("ReplicatedStorage")
+local TweenService_upvr = game:GetService("TweenService")
+local RunService_upvr = game:GetService("RunService")
+local Players_upvr = game:GetService("Players")
+local module = {}
+local Lighting_upvr = require(ReplicatedStorage_upvr.Modules.Schematics.Lighting)
+local Hitboxes_upvr = require(game.ReplicatedStorage.Modules.Hitboxes)
+local Statuses_upvr = require(game.ReplicatedStorage.Modules.Statuses)
+local Sounds_upvr = require(game.ReplicatedStorage.Modules.Sounds)
+local Network_upvr_2 = require(ReplicatedStorage_upvr.Modules.Network)
+local Util_upvr = require(game.ReplicatedStorage.Modules.Util)
+local any_IsServer_result1_upvr = RunService_upvr:IsServer()
+if any_IsServer_result1_upvr then
+	any_IsServer_result1_upvr = require(game:GetService("ServerStorage").ServerSystems.ActorHandler)
+end
+local VoidRushUI_upvr = require(script.Classes.VoidRushUI)
+function module.Created(arg1, arg2) -- Line 29
+	--[[ Upvalues[9]:
+		[1]: RunService_upvr (readonly)
+		[2]: Util_upvr (readonly)
+		[3]: Network_upvr_2 (readonly)
+		[4]: any_IsServer_result1_upvr (readonly)
+		[5]: Sounds_upvr (readonly)
+		[6]: ReplicatedStorage_upvr (readonly)
+		[7]: Statuses_upvr (readonly)
+		[8]: Players_upvr (readonly)
+		[9]: VoidRushUI_upvr (readonly)
+	]]
+	if RunService_upvr:IsServer() then
+		arg2.Behavior.VoidstarEnabled = true
+		if not arg2.Cache then
+			arg2.Cache = {}
+		end
+		arg2.Cache.Animations = {
+			VoidRush = {};
+		}
+		for i, v in pairs(arg2.Config.Animations.VoidRush) do
+			arg2.Cache.Animations.VoidRush[i] = Util_upvr:LoadAnimationFromID(arg2.Rig, v)
+		end
+		local any_LoadAnimationFromID_result1_upvr_2 = Util_upvr:LoadAnimationFromID(arg2.Rig, arg2.Config.Animations.ObservantTeleport)
+		Network_upvr_2:SetConnection(`{arg2.Player.Name}ObservantTeleport`, "REMOTE_EVENT", function(arg1_7, arg2_5) -- Line 44
+			--[[ Upvalues[8]:
+				[1]: arg2 (readonly)
+				[2]: any_IsServer_result1_upvr (copied, readonly)
+				[3]: any_LoadAnimationFromID_result1_upvr_2 (readonly)
+				[4]: Sounds_upvr (copied, readonly)
+				[5]: ReplicatedStorage_upvr (copied, readonly)
+				[6]: Statuses_upvr (copied, readonly)
+				[7]: Util_upvr (copied, readonly)
+				[8]: Network_upvr_2 (copied, readonly)
+			]]
+			local Map_2 = workspace.Map.Ingame:FindFirstChild("Map")
+			if not Map_2 then
+			else
+				if arg1_7 ~= arg2.Player or not arg2_5:IsDescendantOf(Map_2) or not arg2_5:IsA("Model") or not arg2_5.Name:find("Generator") then
+					arg1_7:Kick("\n\nPranksterComet 100:\nInvalid Connection Arguments [ObservantTeleport]\n")
+					return
+				end
+				if arg2.Behavior.Observing then
+					local var106_upvr
+					if any_IsServer_result1_upvr:CanUseAbility(arg2, "Observant") and arg2_5 then
+						local Positions_2 = arg2_5:FindFirstChild("Positions")
+						if Positions_2 then
+							Positions_2 = arg2_5.Positions:GetChildren()
+						end
+						local function INLINED_4() -- Internal function, doesn't exist in bytecode
+							var106_upvr = arg2_5.Positions.Center.CFrame
+							return var106_upvr
+						end
+						if not Positions_2 or not INLINED_4() then
+							var106_upvr = arg2_5:GetPivot()
+						end
+						any_LoadAnimationFromID_result1_upvr_2:Play()
+						arg2.Behavior.ToggleGeneratorAura(arg2, false, arg2_5)
+						arg2.AbilitiesDisabled = true
+						local var109_upvw
+						local task_delay_result1_upvr = task.delay(arg2.Config.ObservantTeleportWindup, function() -- Line 82
+							--[[ Upvalues[5]:
+								[1]: arg2 (copied, readonly)
+								[2]: var106_upvr (readonly)
+								[3]: ReplicatedStorage_upvr (copied, readonly)
+								[4]: Statuses_upvr (copied, readonly)
+								[5]: var109_upvw (read and write)
+							]]
+							-- KONSTANTERROR: [0] 1. Error Block 1 start (CF ANALYSIS FAILED)
+							arg2.Behavior.Teleport(arg2, var106_upvr)
+							local pairs_result1_5, pairs_result2_3, pairs_result3_3 = pairs(require(ReplicatedStorage_upvr.Modules.Actors).CurrentActors)
+							-- KONSTANTERROR: [0] 1. Error Block 1 end (CF ANALYSIS FAILED)
+							-- KONSTANTERROR: [84] 55. Error Block 10 start (CF ANALYSIS FAILED)
+							-- KONSTANTERROR: [84] 55. Error Block 10 end (CF ANALYSIS FAILED)
+							-- KONSTANTERROR: [22] 16. Error Block 2 start (CF ANALYSIS FAILED)
+							-- KONSTANTWARNING: Failed to evaluate expression, replaced with nil [84.6]
+							-- KONSTANTERROR: [22] 16. Error Block 2 end (CF ANALYSIS FAILED)
+						end)
+						local any_Play_result1_upvr_3 = Sounds_upvr:Play(arg2.Config.Sounds.ObservantTeleportChannel, {
+							Parent = arg2.Rig.PrimaryPart;
+						})
+						var109_upvw = arg2.Rig:GetAttributeChangedSignal("Stunned"):Connect(function() -- Line 112
+							--[[ Upvalues[4]:
+								[1]: arg2 (copied, readonly)
+								[2]: var109_upvw (read and write)
+								[3]: task_delay_result1_upvr (readonly)
+								[4]: any_Play_result1_upvr_3 (readonly)
+							]]
+							if arg2.Rig:GetAttribute("Stunned") then
+								if var109_upvw then
+									var109_upvw:Disconnect()
+								end
+								task.cancel(task_delay_result1_upvr)
+								if any_Play_result1_upvr_3 then
+									any_Play_result1_upvr_3:Destroy()
+								end
+							end
+						end)
+						Util_upvr:CreateSpeedMultiplier(arg2.Rig, 0, "ObservantTeleporting", arg2.Config.ObservantTeleportWindup + arg2.Config.ObservantTeleportEndlag, true)
+						arg2.Behavior.RevertObservance(arg2, true)
+						Network_upvr_2:FireClientConnection(arg2.Player, `{arg2.Player.Name}ObservantTeleport`, "REMOTE_EVENT")
+					end
+				end
+			end
+		end)
+		local tbl_14_upvr = {
+			TOOKDAMAGE = {};
+			KILLED = {};
+		}
+		Network_upvr_2:SetConnection(`{arg2.Player.Name}CloneEvent`, "REMOTE_EVENT", function(arg1_8, arg2_6) -- Line 137
+			--[[ Upvalues[5]:
+				[1]: ReplicatedStorage_upvr (copied, readonly)
+				[2]: tbl_14_upvr (readonly)
+				[3]: Statuses_upvr (copied, readonly)
+				[4]: arg2 (readonly)
+				[5]: Util_upvr (copied, readonly)
+			]]
+			-- KONSTANTWARNING: Variable analysis failed. Output will have some incorrect variable assignments
+			local var119
+			if not var119 then
+				var119 = arg1_8:Kick
+				var119("lol")
+			end
+			var119 = tbl_14_upvr[arg2_6]
+			if not var119 then
+				var119 = {}
+			end
+			local Character_2 = arg1_8.Character
+			if Character_2 then
+			end
+			local any_PlayerHasStatus_result1_4 = Statuses_upvr:PlayerHasStatus(arg1_8, "Hallucination")
+			if any_PlayerHasStatus_result1_4 then
+				if require(ReplicatedStorage_upvr.Modules.StatusEffects.KillerExclusive.Hallucination.HallucinationClass.FakeNoli).ApplyAt > any_PlayerHasStatus_result1_4.Level then
+				else
+				end
+			end
+			if var119[arg1_8] then
+				if tick() - var119[arg1_8] >= arg2.Config.StabCooldown - 0.2 then
+				else
+				end
+			end
+			if Character_2 and Character_2.PrimaryPart and true and not true then
+				var119[arg1_8] = tick()
+				if arg2_6 == "TOOKDAMAGE" then
+					Util_upvr:ApplyDamage(arg1_8.Character, arg2.Config.HallucinationCloneDamage)
+					return
+				end
+				if arg2_6 == "KILLED" and workspace.Hitboxes:FindFirstChild(arg1_8.Name.."Hitbox") then
+					Statuses_upvr:RemoveStatus(arg1_8, "Hallucination")
+				end
+			end
+		end)
+		if not RunService_upvr:IsStudio() then
+			arg2:SetCooldownOf("Observant", arg2.Config.ObservantC00ldown)
+		end
+		task.spawn(function() -- Line 173
+			--[[ Upvalues[1]:
+				[1]: arg2 (readonly)
+			]]
+			-- KONSTANTWARNING: Variable analysis failed. Output will have some incorrect variable assignments
+			arg2.Behavior.FakeGenerators = {}
+			local var143
+			repeat
+				task.wait(1)
+				var143 = workspace.Map.Ingame:FindFirstChild("Map")
+				if var143 then
+				end
+				local GeneratorPositions = var143:FindFirstChild("GeneratorPositions")
+			until (not GeneratorPositions or GeneratorPositions:FindFirstChildOfClass("CFrameValue")) and not arg2 and not arg2.Behavior.FakeGenerators
+			warn("waiting complete")
+			if arg2 then
+				local FakeGenerators = arg2.Behavior.FakeGenerators
+			end
+			if not var143 or not FakeGenerators then
+				warn("but we died")
+			else
+				local tbl_29 = {}
+				for _, v_12 in ipairs(GeneratorPositions:GetChildren()) do
+					if v_12:IsA("CFrameValue") then
+						table.insert(tbl_29, v_12)
+					end
+				end
+				if #tbl_29 < 1 then
+					warn("but someone's being fat")
+					return
+				end
+				warn("INITIALIZING FAKE GENERATORS")
+				for _ = 1, math.min(#tbl_29, 2) do
+					local randint_2 = math.random(1, #tbl_29)
+					local var151 = tbl_29[randint_2]
+					local clone_2 = script.FakeGenerator:Clone()
+					clone_2:SetPrimaryPartCFrame(var151.Value)
+					clone_2.Parent = var143
+					clone_2.Remotes.BE.Event:Connect(function(arg1_9, arg2_7) -- Line 210
+						--[[ Upvalues[1]:
+							[1]: arg2 (copied, readonly)
+						]]
+						-- KONSTANTWARNING: Variable analysis failed. Output will have some incorrect variable assignments
+						local Statuses_2 = require(game.ReplicatedStorage.Modules.Statuses)
+						local any_PlayerHasStatus_result1 = Statuses_2:PlayerHasStatus(arg1_9, "Hallucination")
+						local var156
+						local function INLINED_5() -- Internal function, doesn't exist in bytecode
+							var156 = any_PlayerHasStatus_result1.Level
+							return var156
+						end
+						if not any_PlayerHasStatus_result1 or not INLINED_5() then
+							var156 = 0
+						end
+						local tbl_28 = {}
+						if 100 <= arg2_7 then
+						else
+						end
+						tbl_28.Level = math.clamp(var156 + 1, 1, 3)
+						tbl_28.Duration = 15
+						tbl_28.Killer = arg2
+						Statuses_2:ApplyStatus(arg1_9, "Hallucination", tbl_28)
+					end)
+					for _, v_13 in ipairs(clone_2.Scripts:GetChildren()) do
+						if v_13:IsA("BaseScript") then
+							v_13.Enabled = true
+						end
+					end
+					table.insert(FakeGenerators, clone_2)
+					table.remove(tbl_29, randint_2)
+					var151:Destroy()
+				end
+			end
+		end)
+	else
+		any_LoadAnimationFromID_result1_upvr_2 = RunService_upvr:IsClient()
+		if any_LoadAnimationFromID_result1_upvr_2 then
+			tbl_14_upvr = Players_upvr
+			any_LoadAnimationFromID_result1_upvr_2 = tbl_14_upvr.LocalPlayer
+			tbl_14_upvr = arg2.Player
+			if any_LoadAnimationFromID_result1_upvr_2 == tbl_14_upvr then
+				function any_LoadAnimationFromID_result1_upvr_2(arg1_10) -- Line 235, Named "getFailMsg"
+					--[[ Upvalues[1]:
+						[1]: arg2 (readonly)
+					]]
+					return arg2.Config.VoidRushStopMessages[arg1_10]
+				end
+				tbl_14_upvr = Network_upvr_2
+				tbl_14_upvr = tbl_14_upvr:SetConnection
+				tbl_14_upvr(`{arg2.Player.Name}VoidRushUpdateUI`, "REMOTE_EVENT", function(arg1_11) -- Line 240
+					--[[ Upvalues[2]:
+						[1]: VoidRushUI_upvr (copied, readonly)
+						[2]: arg2 (readonly)
+					]]
+					if arg1_11 ~= "Create" or not VoidRushUI_upvr.new(arg2) then
+						local VoidRushUI_upvr_3 = arg2.Behavior.VoidRushUI
+					end
+					if not VoidRushUI_upvr_3 then
+						warn("Noli client had no UI")
+					else
+						VoidRushUI_upvr_3.Counter = (VoidRushUI_upvr_3.Counter or 0) + 1
+						if arg1_11 == "Create" then
+							arg2.Behavior.VoidRushUI = VoidRushUI_upvr_3
+							VoidRushUI_upvr_3:TweenRadial(arg2.Config.VoidRushChargeLength, 0, 1)
+							VoidRushUI_upvr_3:SetText("Charge VoidRush by holding down")
+						else
+							if arg1_11 == "ChargeFail" then
+								VoidRushUI_upvr_3:SetText(arg2.Config.VoidRushStopMessages.FailedToCharge)
+								VoidRushUI_upvr_3:FadeOut(2, false)
+								return
+							end
+							if arg1_11 == "Dash" then
+								VoidRushUI_upvr_3:TweenRadial(arg2.Config.VoidRushDashLength, 1, 0)
+								VoidRushUI_upvr_3:SetText("Release the VoidRush button to cancel")
+								return
+							end
+							if arg1_11 == "Hit" then
+								VoidRushUI_upvr_3:SetText(arg2.Config.VoidRushStopMessages.Hit)
+								VoidRushUI_upvr_3:TweenRadial(arg2.Config.VoidRushHitEndlag, 0, 1)
+								local Counter_upvr = VoidRushUI_upvr_3.Counter
+								task.delay(arg2.Config.VoidRushHitEndlag, function() -- Line 265
+									--[[ Upvalues[3]:
+										[1]: VoidRushUI_upvr_3 (readonly)
+										[2]: Counter_upvr (readonly)
+										[3]: arg2 (copied, readonly)
+									]]
+									if VoidRushUI_upvr_3 and Counter_upvr == VoidRushUI_upvr_3.Counter then
+										VoidRushUI_upvr_3:TweenRadial(arg2.Config.VoidRushComboWindow, 1, 0)
+									end
+								end)
+								return
+							end
+							if arg1_11 == "WindowMiss" then
+								Counter_upvr = VoidRushUI_upvr_3:SetText
+								Counter_upvr(arg2.Config.VoidRushStopMessages.WindowMissed)
+								Counter_upvr = VoidRushUI_upvr_3:FadeOut
+								Counter_upvr(2, false)
+								return
+							end
+							Counter_upvr = arg1_11:match("Miss_")
+							if Counter_upvr then
+								Counter_upvr = arg1_11:sub(6, arg1_11:len())
+								local var165 = Counter_upvr
+								local var166 = var165
+								Counter_upvr = VoidRushUI_upvr_3:SetText
+								Counter_upvr(arg2.Config.VoidRushStopMessages[var166])
+								if var165 ~= "HitLarge" then
+									var166 = false
+								else
+									var166 = true
+								end
+								Counter_upvr = VoidRushUI_upvr_3:FadeOut
+								Counter_upvr(2, var166)
+								return
+							end
+							Counter_upvr = warn
+							Counter_upvr("Invalid server subroutine string", "Miss")
+						end
+					end
+				end)
+				tbl_14_upvr = Network_upvr_2
+				tbl_14_upvr = tbl_14_upvr:SetConnection
+				tbl_14_upvr(`{arg2.Player.Name}ObservantTeleport`, "REMOTE_EVENT", function() -- Line 286
+					--[[ Upvalues[1]:
+						[1]: arg2 (readonly)
+					]]
+					arg2.Behavior.RevertObservance(arg2)
+				end)
+			end
+		end
+	end
+end
+function module.Destroyed(arg1, arg2) -- Line 293
+	--[[ Upvalues[3]:
+		[1]: RunService_upvr (readonly)
+		[2]: Network_upvr_2 (readonly)
+		[3]: Players_upvr (readonly)
+	]]
+	if RunService_upvr:IsServer() then
+		arg2.Behavior.RevertObservance(arg2, false)
+		arg2.Behavior.ToggleGeneratorAura(arg2, false)
+		Network_upvr_2:RemoveConnection(`{arg2.Player.Name}ObservantTeleport`, "REMOTE_EVENT")
+		Network_upvr_2:RemoveConnection(`{arg2.Player.Name}CloneEvent`, "REMOTE_EVENT")
+		local FakeGenerators_4 = arg2.Behavior.FakeGenerators
+		if not FakeGenerators_4 then
+			FakeGenerators_4 = {}
+		end
+		for i_2, v_2 in ipairs(FakeGenerators_4) do
+			v_2:Destroy()
+		end
+		arg2.Behavior.FakeGenerators = nil
+	elseif RunService_upvr:IsClient() and Players_upvr.LocalPlayer == arg2.Player then
+		i_2 = `{arg2.Player.Name}VoidRushUpdateUI`
+		i_2 = "REMOTE_EVENT"
+		Network_upvr_2:RemoveConnection(i_2, i_2)
+		i_2 = `{arg2.Player.Name}ObservantTeleport`
+		i_2 = "REMOTE_EVENT"
+		Network_upvr_2:RemoveConnection(i_2, i_2)
+		if arg2.Behavior.VoidRushUI then
+			arg2.Behavior.VoidRushUI:Destroy()
+		end
+	end
+end
+function module.OnIntroduction(arg1, arg2, arg3, arg4) -- Line 316
+	--[[ Upvalues[3]:
+		[1]: Lighting_upvr (readonly)
+		[2]: Util_upvr (readonly)
+		[3]: Players_upvr (readonly)
+	]]
+	Lighting_upvr:SetCustomLighting(arg2.Config.IntroLighting)
+	if arg3:FindFirstChild("FakeCrown") then
+		arg3.FakeCrown.Transparency = 0
+		arg3.Voidstar.Transparency = 1
+		arg3.VoidstarCrown.Transparency = 1
+	else
+		warn("THIS LOSER HAS NO FAKE CROWN!!!!")
+	end
+	local KillerCutsceneBackground_2_upvr = workspace.Misc:FindFirstChild("KillerCutsceneBackground")
+	local var185_upvw = true
+	task.spawn(function() -- Line 330
+		--[[ Upvalues[2]:
+			[1]: var185_upvw (read and write)
+			[2]: KillerCutsceneBackground_2_upvr (readonly)
+		]]
+		while var185_upvw do
+			for i_3, v_3 in pairs(KillerCutsceneBackground_2_upvr.Voidstars:GetChildren()) do
+				local var194
+				if i_3 % 2 == 0 then
+					var194 = 0.0225
+				else
+					var194 = -0.0225
+				end
+				v_3.CFrame *= CFrame.Angles(0, var194, 0)
+			end
+			task.wait()
+		end
+	end)
+	task.spawn(function() -- Line 339
+		--[[ Upvalues[2]:
+			[1]: var185_upvw (read and write)
+			[2]: KillerCutsceneBackground_2_upvr (readonly)
+		]]
+		while var185_upvw do
+			local Skybox = KillerCutsceneBackground_2_upvr.Skybox
+			Skybox.CFrame *= CFrame.Angles(0, 0.004363323129985824, 0)
+			task.wait()
+		end
+	end)
+	local any_CreateFOVMultiplier_result1_upvr = Util_upvr:CreateFOVMultiplier(Players_upvr.LocalPlayer, 0.375, "NoliIntroScene", arg4)
+	task.delay(1.98, function() -- Line 348
+		--[[ Upvalues[1]:
+			[1]: any_CreateFOVMultiplier_result1_upvr (readonly)
+		]]
+		any_CreateFOVMultiplier_result1_upvr.Value = 0.275
+	end)
+	task.delay(arg4, function() -- Line 352
+		--[[ Upvalues[3]:
+			[1]: var185_upvw (read and write)
+			[2]: arg3 (readonly)
+			[3]: Lighting_upvr (copied, readonly)
+		]]
+		var185_upvw = false
+		arg3.FakeCrown.Transparency = 1
+		arg3.VoidstarCrown.Transparency = 0
+		arg3.Voidstar.Transparency = 0
+		Lighting_upvr:SetAsCurrentLighting()
+	end)
+end
+function module.OnVictory(arg1, arg2, arg3, arg4, arg5) -- Line 362
+	--[[ Upvalues[5]:
+		[1]: Lighting_upvr (readonly)
+		[2]: RunService_upvr (readonly)
+		[3]: TweenService_upvr (readonly)
+		[4]: Util_upvr (readonly)
+		[5]: Players_upvr (readonly)
+	]]
+	if arg2 == "Start" then
+		Lighting_upvr:SetCustomLighting(arg3.Config.OutroLighting)
+		local VictoryKillerTrack_2 = arg3.Cache.VictoryKillerTrack
+		local tbl_upvr = {}
+		local function cacheParticles_upvr(arg1_14) -- Line 373, Named "cacheParticles"
+			--[[ Upvalues[1]:
+				[1]: tbl_upvr (readonly)
+			]]
+			for _, v_4 in ipairs(arg1_14:GetDescendants()) do
+				if v_4:IsA("ParticleEmitter") then
+					warn("caching", v_4.Name)
+					tbl_upvr[v_4.Name] = v_4
+				end
+			end
+		end
+		local ScreenGui_upvr = Instance.new("ScreenGui")
+		ScreenGui_upvr.Name = "NoliOutroOverlay"
+		ScreenGui_upvr.ResetOnSpawn = false
+		ScreenGui_upvr.IgnoreGuiInset = true
+		ScreenGui_upvr.Parent = game.Players.LocalPlayer.PlayerGui
+		VictoryKillerTrack_2.Stopped:Once(function() -- Line 391
+			--[[ Upvalues[1]:
+				[1]: arg4 (readonly)
+			]]
+			if arg4 then
+				arg4:PivotTo(arg4:GetPivot() + Vector3.new(0, -20, 0))
+			end
+		end)
+		for _, v_5 in ipairs(arg4:GetDescendants()) do
+			if v_5:IsA("Sound") then
+				v_5:Destroy()
+			end
+		end
+		game.Players.LocalPlayer:SetAttribute("FOVMultipliersDisabled", true)
+		local VictoryCameraTrack_upvr_2 = arg3.Cache.VictoryCameraTrack
+		local OutroFrameData_upvr = arg3.Config.OutroFrameData
+		task.spawn(function() -- Line 427
+			--[[ Upvalues[1]:
+				[1]: cacheParticles_upvr (readonly)
+			]]
+			local KillerCutsceneBackground = workspace.Misc:WaitForChild("KillerCutsceneBackground", 3)
+			if KillerCutsceneBackground then
+				cacheParticles_upvr(KillerCutsceneBackground.Map.ExplosionGround)
+			end
+		end)
+		task.spawn(function() -- Line 434
+			--[[ Upvalues[2]:
+				[1]: arg3 (readonly)
+				[2]: cacheParticles_upvr (readonly)
+			]]
+			local SOME_2 = workspace.Misc:WaitForChild(arg3.Player.Name.."CameraRig", 3)
+			if SOME_2 then
+				cacheParticles_upvr(SOME_2)
+			end
+		end)
+		task.delay(3.22, function() -- Line 442
+			--[[ Upvalues[4]:
+				[1]: ScreenGui_upvr (readonly)
+				[2]: arg4 (readonly)
+				[3]: TweenService_upvr (copied, readonly)
+				[4]: Util_upvr (copied, readonly)
+			]]
+			local Frame_2 = Instance.new("Frame", ScreenGui_upvr)
+			Frame_2.Size = UDim2.new(10, 0, 10, 0)
+			Frame_2.AnchorPoint = Vector2.new(0.5, 0.5)
+			Frame_2.Position = UDim2.new(0.5, 0, 0.5, 0)
+			Frame_2.BackgroundTransparency = 1
+			Frame_2.BackgroundColor3 = Color3.new(0, 0, 0)
+			local Highlight_2 = Instance.new("Highlight")
+			Highlight_2.FillTransparency = 1
+			Highlight_2.OutlineTransparency = 1
+			Highlight_2.OutlineColor = Color3.new(0.4, 0, 1)
+			Highlight_2.Parent = arg4
+			game.Debris:AddItem(Highlight_2, 3)
+			local ColorCorrectionEffect = Instance.new("ColorCorrectionEffect")
+			ColorCorrectionEffect.Parent = game.Lighting
+			ColorCorrectionEffect.Name = "NoliBoomCC"
+			game.Debris:AddItem(ColorCorrectionEffect, 3)
+			local any_Create_result1_2 = TweenService_upvr:Create(ColorCorrectionEffect, TweenInfo.new(0.65, Enum.EasingStyle.Sine, Enum.EasingDirection.In), {
+				TintColor = Color3.fromRGB(125, 66, 155);
+				Brightness = -0.1;
+				Contrast = 0.5;
+			})
+			any_Create_result1_2:Play()
+			TweenService_upvr:Create(Highlight_2, TweenInfo.new(0.65, Enum.EasingStyle.Quad, Enum.EasingDirection.In, 0, true, 0), {
+				OutlineTransparency = 0.1;
+			}):Play()
+			task.wait(0.65)
+			Util_upvr:ApplyCameraShake(0.2, 1.2)
+			any_Create_result1_2:Pause()
+			ColorCorrectionEffect.Contrast = 1
+			ColorCorrectionEffect.Brightness = 2.8
+			ColorCorrectionEffect.TintColor = Color3.fromRGB(70, 0, 155)
+			TweenService_upvr:Create(ColorCorrectionEffect, TweenInfo.new(1.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+				Brightness = -0.6;
+				TintColor = Color3.new(0.623529, 0.623529, 0.623529);
+				Contrast = -0.5;
+			}):Play()
+			task.wait(1.1)
+			if not Frame_2 then
+			else
+				TweenService_upvr:Create(Frame_2, TweenInfo.new(0.2), {
+					BackgroundTransparency = 0;
+					BackgroundColor3 = Color3.new(0, 0, 0);
+				}):Play()
+			end
+		end)
+		local any_Connect_result1_upvr_2 = RunService_upvr.RenderStepped:Connect(function() -- Line 406
+			--[[ Upvalues[2]:
+				[1]: VictoryCameraTrack_upvr_2 (readonly)
+				[2]: OutroFrameData_upvr (readonly)
+			]]
+			local ceiled = math.ceil((VictoryCameraTrack_upvr_2.TimePosition + 0.001) * 60)
+			if OutroFrameData_upvr.CameraFOV and OutroFrameData_upvr.CameraFOV[ceiled] then
+				local var256 = OutroFrameData_upvr.CameraFOV[ceiled]
+				if not var256 then
+					var256 = OutroFrameData_upvr.CameraFOV[#OutroFrameData_upvr.CameraFOV]
+				end
+				workspace.CurrentCamera.FieldOfView = var256
+			end
+		end)
+		local any_Connect_result1_upvr_4 = VictoryKillerTrack_2:GetMarkerReachedSignal("EmitParticle"):Connect(function(arg1_15) -- Line 415
+			--[[ Upvalues[1]:
+				[1]: tbl_upvr (readonly)
+			]]
+			local var258 = tbl_upvr[arg1_15]
+			local EmitCount_2 = var258:GetAttribute("EmitCount")
+			if not EmitCount_2 then
+				var258.Enabled = not var258.Enabled
+			else
+				var258:Emit(EmitCount_2)
+			end
+		end)
+		task.delay(arg5, function() -- Line 490
+			--[[ Upvalues[2]:
+				[1]: any_Connect_result1_upvr_2 (readonly)
+				[2]: any_Connect_result1_upvr_4 (readonly)
+			]]
+			any_Connect_result1_upvr_2:Disconnect()
+			any_Connect_result1_upvr_4:Disconnect()
+		end)
+	elseif arg2 == "End" then
+		OutroFrameData_upvr = Players_upvr.LocalPlayer
+		VictoryCameraTrack_upvr_2 = "FOVMultipliersDisabled"
+		tbl_upvr = nil
+		OutroFrameData_upvr = OutroFrameData_upvr:SetAttribute
+		OutroFrameData_upvr(VictoryCameraTrack_upvr_2, tbl_upvr)
+		OutroFrameData_upvr = Lighting_upvr:SetAsCurrentLighting
+		OutroFrameData_upvr()
+		VictoryCameraTrack_upvr_2 = Players_upvr
+		OutroFrameData_upvr = VictoryCameraTrack_upvr_2.LocalPlayer.PlayerGui
+		VictoryCameraTrack_upvr_2 = "NoliOutroOverlay"
+		OutroFrameData_upvr = OutroFrameData_upvr:FindFirstChild(VictoryCameraTrack_upvr_2)
+		if OutroFrameData_upvr then
+			tbl_upvr = Players_upvr
+			VictoryCameraTrack_upvr_2 = tbl_upvr.LocalPlayer
+			OutroFrameData_upvr = VictoryCameraTrack_upvr_2.PlayerGui.NoliOutroOverlay:Destroy
+			OutroFrameData_upvr()
+		end
+	end
+end
+function module.OnExecution(arg1, arg2, arg3) -- Line 505
+	--[[ Upvalues[2]:
+		[1]: TweenService_upvr (readonly)
+		[2]: Network_upvr_2 (readonly)
+	]]
+	local Rig_upvr = arg2.Rig
+	Rig_upvr.Voidstar.Transparency = 1
+	task.delay(2.2, function() -- Line 510
+		--[[ Upvalues[2]:
+			[1]: TweenService_upvr (copied, readonly)
+			[2]: Rig_upvr (readonly)
+		]]
+		TweenService_upvr:Create(Rig_upvr.Voidstar, TweenInfo.new(0.25), {
+			Transparency = 0;
+		}):Play()
+		task.wait(1)
+		TweenService_upvr:Create(Rig_upvr.Voidstar, TweenInfo.new(0.25), {
+			Transparency = 1;
+		}):Play()
+		task.wait(1)
+		TweenService_upvr:Create(Rig_upvr.Voidstar, TweenInfo.new(0.25), {
+			Transparency = 0;
+		}):Play()
+	end)
+	Network_upvr_2:FireAllClientConnection("Ragdoll", "REMOTE_EVENT", arg3, workspace:GetServerTimeNow() + 2.425, `{Vector3.new(0, 400, 0).X}|{Vector3.new(0, 400, 0).Y}|{Vector3.new(0, 400, 0).Z}`)
+	task.delay(2.4, function() -- Line 530
+		--[[ Upvalues[2]:
+			[1]: arg3 (readonly)
+			[2]: Rig_upvr (readonly)
+		]]
+		local Head = arg3:FindFirstChild("Head")
+		local Humanoid = arg3:FindFirstChild("Humanoid")
+		if Humanoid then
+			Humanoid.BreakJointsOnDeath = false
+			Humanoid.Health = 0
+			if Head then
+				Head:Destroy()
+			end
+			for _, v_6 in ipairs(Rig_upvr.Voidstar.Crush:GetChildren()) do
+				if v_6:IsA("ParticleEmitter") then
+					v_6.Enabled = true
+				end
+			end
+			task.delay(0.125, function() -- Line 549
+				--[[ Upvalues[1]:
+					[1]: Rig_upvr (copied, readonly)
+				]]
+				for _, v_7 in ipairs(Rig_upvr.Voidstar.Crush:GetChildren()) do
+					if v_7:IsA("ParticleEmitter") then
+						v_7.Enabled = false
+					end
+				end
+			end)
+		end
+	end)
+end
+local tbl_3 = {}
+local tbl_8 = {
+	LayoutOrder = 1;
+	Icon = "rbxassetid://93874368032471";
+	KeybindType = "MainAbility";
+}
+local function Callback(arg1, arg2) -- Line 566
+	--[[ Upvalues[4]:
+		[1]: RunService_upvr (readonly)
+		[2]: Sounds_upvr (readonly)
+		[3]: Hitboxes_upvr (readonly)
+		[4]: Util_upvr (readonly)
+	]]
+	if RunService_upvr:IsServer() then
+		arg1.AbilitiesDisabled = true
+		Sounds_upvr:Play(arg1.Config.Sounds.Swing, {
+			Parent = arg1.Rig.PrimaryPart;
+			PlaybackSpeed = Random.new():NextNumber(0.975, 1.025);
+			Volume = 0.25;
+		})
+		arg1.Behavior.DisableVoidstar(arg1)
+		task.delay(arg1.Config.StabWindup, function() -- Line 579
+			--[[ Upvalues[4]:
+				[1]: Hitboxes_upvr (copied, readonly)
+				[2]: arg1 (readonly)
+				[3]: Util_upvr (copied, readonly)
+				[4]: Sounds_upvr (copied, readonly)
+			]]
+			local tbl_24 = {}
+			local function Hit(arg1_16, arg2_8) -- Line 591
+				--[[ Upvalues[3]:
+					[1]: Util_upvr (copied, readonly)
+					[2]: Sounds_upvr (copied, readonly)
+					[3]: arg1 (copied, readonly)
+				]]
+				Util_upvr:CreateSpeedMultiplier(arg1_16, 1.5, "HitSpeedBonus", 1.25)
+				if arg2_8 then
+					Sounds_upvr:Play(arg1.Config.Sounds.Hit, {
+						Parent = arg1.Rig.PrimaryPart;
+						PlaybackSpeed = Random.new():NextNumber(0.975, 1.025);
+						Volume = 0.25;
+					})
+				end
+			end
+			tbl_24.Hit = Hit
+			;({
+				Size = Vector3.new(4.5, 6, 9);
+				CFrameOffset = CFrame.new(0, 0, -2.5);
+				Damage = arg1.Config.StabDamage;
+				Time = 0.25;
+				Knockback = 2;
+				HitMultiple = false;
+				ExecuteOnKill = true;
+			}).Connections = tbl_24
+		end)
+		task.delay(arg1.Config.StabEndlag, function() -- Line 602
+			--[[ Upvalues[1]:
+				[1]: arg1 (readonly)
+			]]
+			arg1.AbilitiesDisabled = false
+			arg1.Behavior.EnableVoidstar(arg1)
+		end)
+	elseif RunService_upvr:IsClient() then
+		arg1.Animations.Stab:Play(0.175)
+	end
+end
+tbl_8.Callback = Callback
+tbl_3.Stab = tbl_8
+local tbl_16 = {
+	LayoutOrder = 2;
+	Icon = "rbxassetid://93874368032471";
+	KeybindType = "AltAbility1";
+	FlavorText = "[Hold]";
+}
+local function Callback(arg1, arg2) -- Line 623
+	--[[ Upvalues[7]:
+		[1]: Sounds_upvr (readonly)
+		[2]: RunService_upvr (readonly)
+		[3]: Util_upvr (readonly)
+		[4]: Network_upvr_2 (readonly)
+		[5]: Hitboxes_upvr (readonly)
+		[6]: Statuses_upvr (readonly)
+		[7]: ReplicatedStorage_upvr (readonly)
+	]]
+	local Behavior_upvr = arg1.Behavior
+	local formatted_upvr_2 = `{arg1.Player.Name}VoidRushCollision`
+	local formatted_upvr_3 = `{arg1.Player.Name}VoidRushUpdateUI`
+	local function playSound_upvr(arg1_17) -- Line 631, Named "playSound"
+		--[[ Upvalues[2]:
+			[1]: arg1 (readonly)
+			[2]: Sounds_upvr (copied, readonly)
+		]]
+		local Sounds = arg1.Config.Sounds
+		local var308 = Sounds[`VoidRush{arg1_17}`]
+		if not var308 then
+			var308 = Sounds[arg1_17]
+		end
+		if var308 then
+			Sounds_upvr:Play(var308, {
+				Parent = arg1.Rig.PrimaryPart;
+				PlaybackSpeed = Random.new():NextNumber(0.975, 1.025);
+				Volume = 0.85;
+			})
+		end
+	end
+	if RunService_upvr:IsServer() then
+		local function giveEndlag_upvr(arg1_18, arg2_9) -- Line 643, Named "giveEndlag"
+			--[[ Upvalues[3]:
+				[1]: arg1 (readonly)
+				[2]: Util_upvr (copied, readonly)
+				[3]: Behavior_upvr (readonly)
+			]]
+			-- KONSTANTWARNING: Variable analysis failed. Output will have some incorrect variable assignments
+			arg1.AbilitiesDisabled = true
+			local var310
+			local function INLINED_6() -- Internal function, doesn't exist in bytecode
+				var310 = arg1.Config.VoidRushComboWindow
+				return var310
+			end
+			if not arg2_9 or not INLINED_6() then
+				var310 = 0
+			end
+			Util_upvr:CreateSpeedMultiplier(arg1.Rig, 0.6, "VoidRushEndlag", arg1_18 + var310)
+			if not arg2_9 or not tick() then
+			end
+			Behavior_upvr.EndlagTick = nil
+			Behavior_upvr.EndlagDuration = arg1_18
+			task.delay(arg1_18, function() -- Line 648
+				--[[ Upvalues[1]:
+					[1]: arg1 (copied, readonly)
+				]]
+				arg1.AbilitiesDisabled = false
+			end)
+		end
+		local function _(arg1_19) -- Line 653, Named "updateLocalUI"
+			--[[ Upvalues[3]:
+				[1]: Network_upvr_2 (copied, readonly)
+				[2]: arg1 (readonly)
+				[3]: formatted_upvr_3 (readonly)
+			]]
+			Network_upvr_2:FireClientConnection(arg1.Player, formatted_upvr_3, "REMOTE_EVENT", arg1_19)
+		end
+		local EndlagTick_upvw = Behavior_upvr.EndlagTick
+		if EndlagTick_upvw then
+			if tick() - Behavior_upvr.EndlagTick >= Behavior_upvr.EndlagDuration + arg1.Config.VoidRushComboWindow then
+				EndlagTick_upvw = false
+			else
+				EndlagTick_upvw = true
+			end
+		end
+		arg1.AbilitiesDisabled = true
+		arg1.Behavior.DisableVoidstar(arg1)
+		local VoidRush_upvw = arg1.Cache.Animations.VoidRush
+		local formatted_upvr = `{arg1.Player.Name}VoidRushCancel`
+		local function var313() -- Line 664
+			--[[ Upvalues[14]:
+				[1]: EndlagTick_upvw (readonly)
+				[2]: Network_upvr_2 (copied, readonly)
+				[3]: arg1 (readonly)
+				[4]: formatted_upvr_3 (readonly)
+				[5]: VoidRush_upvw (readonly)
+				[6]: playSound_upvr (readonly)
+				[7]: Util_upvr (copied, readonly)
+				[8]: formatted_upvr (readonly)
+				[9]: RunService_upvr (copied, readonly)
+				[10]: Behavior_upvr (readonly)
+				[11]: Hitboxes_upvr (copied, readonly)
+				[12]: formatted_upvr_2 (readonly)
+				[13]: Statuses_upvr (copied, readonly)
+				[14]: giveEndlag_upvr (readonly)
+			]]
+			-- KONSTANTWARNING: Variable analysis failed. Output will have some incorrect variable assignments
+			local var316_upvw
+			if not EndlagTick_upvw then
+				Network_upvr_2:FireClientConnection(arg1.Player, formatted_upvr_3, "REMOTE_EVENT", "Create")
+				var316_upvw = false
+				VoidRush_upvw.StartCharge:Play(0.15)
+				VoidRush_upvw.LoopCharge:Play(0.2)
+				playSound_upvr("Start")
+				playSound_upvr("Loop")
+				arg1.Rig:SetAttribute("VoidRushState", "Charging")
+				Network_upvr_2:SetConnection(formatted_upvr, "REMOTE_EVENT", function() -- Line 684
+					--[[ Upvalues[1]:
+						[1]: var316_upvw (read and write)
+					]]
+					var316_upvw = true
+				end)
+				repeat
+					if arg1.Rig:GetAttribute("Stunned") then
+						var316_upvw = true
+					end
+				until arg1.Config.VoidRushChargeLength <= 0 + RunService_upvr.Heartbeat:Wait() and var316_upvw
+				Network_upvr_2:RemoveConnection(formatted_upvr)
+				VoidRush_upvw.StartCharge:Stop()
+				VoidRush_upvw.LoopCharge:Stop()
+				Util_upvr:CreateSpeedMultiplier(arg1.Rig, arg1.Config.VoidRushChargingSpeed, "VoidRushCharging", arg1.Config.VoidRushChargeLength):Destroy()
+				if var316_upvw then
+					arg1:SetCooldownOf("VoidRush", arg1.Config.VoidRushC00ldown / 2)
+					arg1.Rig:SetAttribute("VoidRushState", "ChargingCancelled")
+					VoidRush_upvw.CancelCharge:Play(0.15)
+					playSound_upvr("Cancel")
+					Network_upvr_2:FireClientConnection(arg1.Player, formatted_upvr_3, "REMOTE_EVENT", "ChargeFail")
+					task.delay(0.2, function() -- Line 712
+						--[[ Upvalues[1]:
+							[1]: arg1 (copied, readonly)
+						]]
+						arg1.Behavior.EnableVoidstar(arg1)
+						arg1.AbilitiesDisabled = false
+						arg1.DisabledAbilities = nil
+						arg1.Rig:SetAttribute("VoidRushState", nil)
+					end)
+					return
+				end
+			end
+			if EndlagTick_upvw then
+			else
+			end
+			local function stopDashAnimations_upvr() -- Line 734, Named "stopDashAnimations"
+				--[[ Upvalues[1]:
+					[1]: VoidRush_upvw (copied, readonly)
+				]]
+				for _, v_8 in ipairs({"StartDashInit", "LoopDashCombo", "LoopDashInit", "StartDashCombo"}) do
+					if VoidRush_upvw[v_8] then
+						VoidRush_upvw[v_8]:Stop()
+					end
+				end
+			end
+			stopDashAnimations_upvr()
+			VoidRush_upvw[`StartDash{"Init"}`]:Play(0.05)
+			-- KONSTANTERROR: Expression was reused, decompilation is incorrect
+			VoidRush_upvw[`LoopDash{"Init"}`]:Play(0.05)
+			if EndlagTick_upvw then
+			else
+			end
+			playSound_upvr("Dash"..tostring(1))
+			if Behavior_upvr.EndlagComboThread then
+				task.cancel(Behavior_upvr.EndlagComboThread)
+				Behavior_upvr.EndlagComboThread = nil
+			end
+			local var325_upvw
+			local var326_upvw
+			local var327_upvw
+			local var328_upvw
+			local var329_upvw
+			local function _() -- Line 754
+				--[[ Upvalues[1]:
+					[1]: var328_upvw (read and write)
+				]]
+				var328_upvw = true
+			end
+			local tbl_9 = {
+				Size = Vector3.new(6, 6, 4);
+				Damage = arg1.Config.VoidRushBaseDamage;
+				CFrameOffset = CFrame.new(0, 0, -2);
+				Time = arg1.Config.VoidRushDashLength;
+				Knockback = 5;
+				HitMultiple = false;
+				ExecuteOnKill = false;
+			}
+			local tbl_18 = {}
+			local function Hit(arg1_20) -- Line 765
+				--[[ Upvalues[1]:
+					[1]: var325_upvw (read and write)
+				]]
+				var325_upvw = arg1_20
+			end
+			tbl_18.Hit = Hit
+			function tbl_18.Ended() -- Line 768
+				--[[ Upvalues[1]:
+					[1]: var326_upvw (read and write)
+				]]
+				var326_upvw = true
+			end
+			tbl_9.Connections = tbl_18
+			local Network_upvr = require(game.ReplicatedStorage.Modules.Network)
+			local function _(arg1_21, arg2_10) -- Line 776
+				--[[ Upvalues[2]:
+					[1]: var327_upvw (read and write)
+					[2]: var329_upvw (read and write)
+				]]
+				var327_upvw = arg2_10
+				var329_upvw = true
+			end
+			Util_upvr:CreateSpeedMultiplier(arg1.Rig, 1, "VoidRushEndlag", 0)
+			Util_upvr:CreateSpeedMultiplier(arg1.Rig, 1, "VoidRushCharging", 0)
+			arg1.Rig:SetAttribute("VoidRushState", "Dashing")
+			Network_upvr_2:FireClientConnection(arg1.Player, formatted_upvr_3, "REMOTE_EVENT", "Dash")
+			local any_CreateSpeedMultiplier_result1_upvr = Util_upvr:CreateSpeedMultiplier(arg1.Rig, arg1.Config.VoidRushDashSpeed / arg1.Config.Speed, "VoidRushDash")
+			local any_CreateHitbox_result1_upvr = Hitboxes_upvr:CreateHitbox(arg1.Player, tbl_9)
+			local VoidRushHallucinationLevel_upvr = arg1.Config.VoidRushHallucinationLevel
+			task.spawn(function() -- Line 792
+				--[[ Upvalues[22]:
+					[1]: var325_upvw (read and write)
+					[2]: var326_upvw (read and write)
+					[3]: var328_upvw (read and write)
+					[4]: var327_upvw (read and write)
+					[5]: var329_upvw (read and write)
+					[6]: arg1 (copied, readonly)
+					[7]: any_CreateSpeedMultiplier_result1_upvr (readonly)
+					[8]: Network_upvr (readonly)
+					[9]: formatted_upvr_2 (copied, readonly)
+					[10]: any_CreateHitbox_result1_upvr (readonly)
+					[11]: Statuses_upvr (copied, readonly)
+					[12]: VoidRushHallucinationLevel_upvr (readonly)
+					[13]: Util_upvr (copied, readonly)
+					[14]: playSound_upvr (copied, readonly)
+					[15]: VoidRush_upvw (copied, readonly)
+					[16]: Network_upvr_2 (copied, readonly)
+					[17]: formatted_upvr_3 (copied, readonly)
+					[18]: Hitboxes_upvr (copied, readonly)
+					[19]: EndlagTick_upvw (copied, readonly)
+					[20]: giveEndlag_upvr (copied, readonly)
+					[21]: Behavior_upvr (copied, readonly)
+					[22]: stopDashAnimations_upvr (readonly)
+				]]
+				-- KONSTANTERROR: [0] 1. Error Block 71 start (CF ANALYSIS FAILED)
+				repeat
+					task.wait()
+				until var325_upvw and var326_upvw and var328_upvw and var327_upvw and var329_upvw and not arg1.Rig.PrimaryPart
+				if var326_upvw then
+					-- KONSTANTWARNING: GOTO [33] #31
+				end
+				-- KONSTANTERROR: [0] 1. Error Block 71 end (CF ANALYSIS FAILED)
+				-- KONSTANTERROR: [24] 22. Error Block 48 start (CF ANALYSIS FAILED)
+				if var328_upvw then
+					-- KONSTANTWARNING: GOTO [33] #31
+				end
+				-- KONSTANTERROR: [24] 22. Error Block 48 end (CF ANALYSIS FAILED)
+			end)
+		end
+		task.spawn(var313)
+		local module_2 = {}
+		var313 = not EndlagTick_upvw
+		local var340 = var313
+		if var340 then
+			var340 = tick()
+		end
+		module_2.SentTick = var340
+		return module_2
+	end
+	giveEndlag_upvr = RunService_upvr:IsClient()
+	if giveEndlag_upvr then
+		giveEndlag_upvr = arg2
+		local var341 = giveEndlag_upvr
+		if var341 then
+			var341 = arg2.SentTick
+		end
+		local function _() -- Line 961, Named "getState"
+			--[[ Upvalues[1]:
+				[1]: arg1 (readonly)
+			]]
+			return arg1.Rig:GetAttribute("VoidRushState")
+		end
+		VoidRush_upvw = Network_upvr_2:FireConnection
+		VoidRush_upvw("DisableSprinting", "VoidRushCharging", true)
+		if var341 then
+			VoidRush_upvw = false
+			while true do
+				EndlagTick_upvw = RunService_upvr.Heartbeat:Wait()
+				if not EndlagTick_upvw then break end
+				EndlagTick_upvw = arg1.HeldAbilities.VoidRush
+				if not EndlagTick_upvw and not VoidRush_upvw then
+					VoidRush_upvw = true
+					EndlagTick_upvw = Network_upvr_2:FireServerConnection
+					EndlagTick_upvw(formatted_upvr, "REMOTE_EVENT")
+				else
+					EndlagTick_upvw = arg1.Rig:GetAttribute("VoidRushState")
+					if EndlagTick_upvw ~= "Charging" then break end
+				end
+			end
+		end
+		VoidRush_upvw = arg1.Rig:GetAttribute("VoidRushState")
+		if VoidRush_upvw == "ChargingCancelled" then
+			VoidRush_upvw = Network_upvr_2:FireConnection
+			VoidRush_upvw("DisableSprinting", "VoidRushCharging", false)
+			return
+		end
+		VoidRush_upvw = 0
+		EndlagTick_upvw = false
+		local LookVector = workspace.CurrentCamera.CFrame.LookVector
+		Network_upvr_2:FireConnection("DisableSprinting", "VoidRushCharging", true)
+		local Sprinting = require(ReplicatedStorage_upvr.Systems.Character.Game.Sprinting)
+		Sprinting.StaminaCap = Sprinting.Stamina + 1
+		local var345_upvw = Vector3.new(0, 0, 0)
+		local Unit_upvw = Vector3.new(LookVector.X, 0, LookVector.Z).Unit
+		RunService_upvr:BindToRenderStep("VoidRushCharging", Enum.RenderPriority.Character.Value + 1, function(arg1_22) -- Line 1005
+			--[[ Upvalues[7]:
+				[1]: VoidRush_upvw (read and write)
+				[2]: arg1 (readonly)
+				[3]: EndlagTick_upvw (read and write)
+				[4]: Network_upvr_2 (copied, readonly)
+				[5]: formatted_upvr_2 (readonly)
+				[6]: var345_upvw (read and write)
+				[7]: Unit_upvw (read and write)
+			]]
+			VoidRush_upvw += arg1_22
+			local var355
+			if var355 <= VoidRush_upvw then
+				var355 = arg1.Rig.PrimaryPart.Velocity
+				var355 = arg1.Config.VoidRushDashSpeed / 3
+				if var355.Magnitude <= var355 then
+					if not EndlagTick_upvw then
+						EndlagTick_upvw = true
+						Network_upvr_2:FireServerConnection(formatted_upvr_2, "REMOTE_EVENT", arg1.HeldAbilities.VoidRush)
+					end
+					return
+				end
+			end
+			var355 = arg1
+			var355 = var355.Rig:FindFirstChild("SpeedMultipliers")
+			if var355 then
+				var355 = var355.Rig:FindFirstChild("SpeedMultipliers"):FindFirstChild("VoidRushDash")
+			end
+			if var355 then
+				local var357 = arg1
+				local var358 = arg1.Config.VoidRushDashSpeed / var357.Config.Speed
+				if arg1.HeldAbilities.VoidRush then
+					var357 = 1
+				else
+					var357 = -1
+				end
+				var355.Value = math.clamp(var355.Value + arg1_22 * var357 * 2 * var358, 0, var358)
+			end
+			local LookVector_2 = workspace.CurrentCamera.CFrame.LookVector
+			var345_upvw = Vector3.new(LookVector_2.X, 0, LookVector_2.Z).Unit
+			local var360 = var345_upvw - Unit_upvw
+			local Magnitude = var360.Magnitude
+			if 0 < Magnitude then
+				local var362 = arg1.Config.VoidRushTurnSpeed * arg1_22
+				if Magnitude <= var362 then
+					Unit_upvw = var345_upvw
+				else
+					Unit_upvw += var360.Unit * var362
+				end
+				Unit_upvw = Unit_upvw.Unit
+			end
+			arg1.Rig.Humanoid:Move(Unit_upvw)
+		end)
+		repeat
+		until not RunService_upvr.Heartbeat:Wait() and not arg1 and not arg1.Rig and arg1.Rig:GetAttribute("VoidRushState") ~= "Dashing"
+		Sprinting.StaminaCap = nil
+		Network_upvr_2:FireConnection("DisableSprinting", "VoidRushCharging", false)
+		RunService_upvr:UnbindFromRenderStep("VoidRushCharging")
+	end
+end
+tbl_16.Callback = Callback
+tbl_3.VoidRush = tbl_16
+local tbl_13 = {
+	LayoutOrder = 3;
+	Icon = "rbxassetid://93874368032471";
+	KeybindType = "AltAbility2";
+}
+local function Callback(arg1, arg2) -- Line 1067
+	--[[ Upvalues[4]:
+		[1]: RunService_upvr (readonly)
+		[2]: Util_upvr (readonly)
+		[3]: Sounds_upvr (readonly)
+		[4]: Hitboxes_upvr (readonly)
+	]]
+	if RunService_upvr:IsServer() then
+		if arg1.Behavior.Voidstar then
+			arg1.Behavior.DetonateVoidstar(arg1, arg1.Behavior.Voidstar, true)
+			arg1.Behavior.Voidstar = nil
+		else
+			local ImplantWindup = arg1.Config.ImplantWindup
+			arg1.AbilitiesDisabled = true
+			arg1.DisabledAbilities = {
+				Stab = true;
+				VoidRush = true;
+				Observant = true;
+			}
+			arg1:SetCooldownOf("Implant", ImplantWindup + 0.2)
+			task.delay(ImplantWindup + 0.2, function() -- Line 1087
+				--[[ Upvalues[1]:
+					[1]: arg1 (readonly)
+				]]
+				arg1.AbilitiesDisabled = false
+			end)
+			Sounds_upvr:Play(arg1.Config.Sounds.Implant, {
+				Parent = arg1.Rig.PrimaryPart;
+			})
+			local var369_upvw = false
+			task.delay(ImplantWindup, function() -- Line 1095
+				--[[ Upvalues[5]:
+					[1]: arg1 (readonly)
+					[2]: var369_upvw (read and write)
+					[3]: Util_upvr (copied, readonly)
+					[4]: Hitboxes_upvr (copied, readonly)
+					[5]: RunService_upvr (copied, readonly)
+				]]
+				if arg1.Rig:GetAttribute("Stunned") then
+					var369_upvw = true
+				else
+					arg1.Behavior.DisableVoidstar(arg1)
+					local var370_upvw
+					local clone_5_upvw = arg1.Config.ImplantProjectile:Clone()
+					clone_5_upvw.CFrame = arg1.Rig.PrimaryPart.CFrame
+					clone_5_upvw.Parent = workspace.Map.Ingame
+					clone_5_upvw.RootPriority = -2
+					arg1.Behavior.Voidstar = clone_5_upvw
+					local RaycastParams_new_result1_upvr = RaycastParams.new()
+					RaycastParams_new_result1_upvr.RespectCanCollide = true
+					RaycastParams_new_result1_upvr.CollisionGroup = "Survivor"
+					RaycastParams_new_result1_upvr.FilterType = Enum.RaycastFilterType.Exclude
+					RaycastParams_new_result1_upvr.FilterDescendantsInstances = {workspace.Players, clone_5_upvw}
+					local tbl_23 = {
+						Size = Vector3.new(3.29999, 3.29999, 3.29999);
+						CFrame = function() -- Line 1132, Named "CFrame"
+							--[[ Upvalues[1]:
+								[1]: clone_5_upvw (read and write)
+							]]
+							local var375 = clone_5_upvw
+							if var375 then
+								var375 = clone_5_upvw.CFrame
+							end
+							return var375
+						end;
+						Damage = 0;
+						Time = 15;
+						Knockback = 0;
+						HitMultiple = false;
+						PredictVelocity = false;
+						ExecuteOnKill = false;
+						IsProjectile = true;
+					}
+					local tbl_10 = {}
+					local var377_upvw
+					local var378_upvw
+					local function Hit(arg1_23) -- Line 1143
+						--[[ Upvalues[5]:
+							[1]: var370_upvw (read and write)
+							[2]: var377_upvw (read and write)
+							[3]: arg1 (copied, readonly)
+							[4]: clone_5_upvw (read and write)
+							[5]: var378_upvw (read and write)
+						]]
+						if var370_upvw or var377_upvw or not arg1.Behavior.Voidstar then
+						else
+							var370_upvw = arg1_23
+							var377_upvw = arg1_23
+							arg1.Behavior.DetonateVoidstar(arg1, clone_5_upvw)
+							var378_upvw:Cancel()
+						end
+					end
+					tbl_10.Hit = Hit
+					tbl_23.Connections = tbl_10
+					var378_upvw = Hitboxes_upvr:CreateHitbox(arg1.Player, tbl_23)
+					local Position_upvw = clone_5_upvw.Position
+					local function repCast_upvr() -- Line 1157, Named "repCast"
+						--[[ Upvalues[3]:
+							[1]: Position_upvw (read and write)
+							[2]: clone_5_upvw (read and write)
+							[3]: RaycastParams_new_result1_upvr (readonly)
+						]]
+						repeat
+							local workspace_Raycast_result1 = workspace:Raycast(Position_upvw, clone_5_upvw.Position - Position_upvw, RaycastParams_new_result1_upvr)
+							local var381 = workspace_Raycast_result1
+							if var381 then
+								if 0.9 >= workspace_Raycast_result1.Instance.Transparency then
+									var381 = false
+								else
+									var381 = true
+								end
+							end
+							local var382 = var381
+							if var382 then
+								RaycastParams_new_result1_upvr:AddToFilter(workspace_Raycast_result1.Instance)
+							end
+						until not workspace_Raycast_result1 and (not workspace_Raycast_result1 or not var382)
+						return workspace_Raycast_result1
+					end
+					local Position_upvr = arg1.Rig.PrimaryPart.Position
+					local ImplantMaxRange_upvr = arg1.Config.ImplantMaxRange
+					local var386_upvw
+					local cframe_upvr = CFrame.Angles(Random.new():NextNumber(-0.5, 0.5), Random.new():NextNumber(-0.5, 0.5), Random.new():NextNumber(-0.5, 0.5))
+					local Unit_upvr = (Util_upvr:GetPlayerMousePosition(arg1.Player) - arg1.Rig.PrimaryPart.Position).Unit
+					local ImplantProjectileSpeed_upvr = arg1.Config.ImplantProjectileSpeed
+					var386_upvw = RunService_upvr.Heartbeat:Connect(function(arg1_24) -- Line 1175
+						--[[ Upvalues[12]:
+							[1]: clone_5_upvw (read and write)
+							[2]: arg1 (copied, readonly)
+							[3]: Position_upvr (readonly)
+							[4]: ImplantMaxRange_upvr (readonly)
+							[5]: var370_upvw (read and write)
+							[6]: var378_upvw (read and write)
+							[7]: var386_upvw (read and write)
+							[8]: cframe_upvr (readonly)
+							[9]: Unit_upvr (readonly)
+							[10]: ImplantProjectileSpeed_upvr (readonly)
+							[11]: repCast_upvr (readonly)
+							[12]: Position_upvw (read and write)
+						]]
+						-- KONSTANTERROR: [0] 1. Error Block 1 start (CF ANALYSIS FAILED)
+						-- KONSTANTERROR: [0] 1. Error Block 1 end (CF ANALYSIS FAILED)
+						-- KONSTANTERROR: [2] 3. Error Block 2 start (CF ANALYSIS FAILED)
+						-- KONSTANTERROR: [2] 3. Error Block 2 end (CF ANALYSIS FAILED)
+						-- KONSTANTERROR: [30] 24. Error Block 22 start (CF ANALYSIS FAILED)
+						if clone_5_upvw then
+							clone_5_upvw:Destroy()
+						end
+						if var378_upvw then
+							var378_upvw:Cancel()
+						end
+						arg1:SetCooldownOf("Implant", arg1.Config.ImplantCooldown)
+						arg1.Behavior.Voidstar = nil
+						arg1.DisabledAbilities = {}
+						arg1.Behavior.Voidstar = nil
+						var386_upvw:Disconnect()
+						arg1.Behavior.EnableVoidstar(arg1)
+						do
+							return
+						end
+						-- KONSTANTERROR: [30] 24. Error Block 22 end (CF ANALYSIS FAILED)
+					end)
+				end
+			end)
+		end
+	end
+	if RunService_upvr:IsClient() then
+		arg1.Animations.ImplantThrow:Play(0.175)
+	end
+end
+tbl_13.Callback = Callback
+tbl_3.Implant = tbl_13
+tbl_3.Observant = {
+	LayoutOrder = 4;
+	Icon = "rbxassetid://93874368032471";
+	KeybindType = "AltAbility3";
+	Callback = function(arg1, arg2) -- Line 1221, Named "Callback"
+		--[[ Upvalues[4]:
+			[1]: RunService_upvr (readonly)
+			[2]: Sounds_upvr (readonly)
+			[3]: Network_upvr_2 (readonly)
+			[4]: Util_upvr (readonly)
+		]]
+		if RunService_upvr:IsServer() then
+			if arg1.Behavior.Observing then
+				Sounds_upvr:Play(arg1.Config.Sounds.ObservantOff, {
+					Parent = arg1.Rig.PrimaryPart;
+				})
+				arg1.Behavior.RevertObservance(arg1, false)
+				arg1.Behavior.ToggleGeneratorAura(arg1, false)
+				return {
+					Result = false;
+				}
+			end
+			if not workspace:FindFirstChild("Map") or not workspace.Map:FindFirstChild("Ingame") or not workspace.Map.Ingame:FindFirstChild("Map") then
+				warn("MAP NOT FOUND!!!")
+				return
+			end
+			arg1.Behavior.ToggleGeneratorAura(arg1, true)
+			Sounds_upvr:Play(arg1.Config.Sounds.ObservantOn, {
+				Parent = arg1.Rig.PrimaryPart;
+			})
+			arg1.Behavior.Observing = true
+			arg1.DisabledAbilities = {
+				VoidRush = true;
+				Implant = true;
+				Stab = true;
+			}
+			arg1.AbilitiesDisabled = true
+			if arg1.ObservantConnection then
+				arg1.ObservantConnection:Disconnect()
+				arg1.ObservantConnection = nil
+			end
+			arg1.ObservantConnection = arg1.Rig:GetAttributeChangedSignal("Stunned"):Connect(function() -- Line 1252
+				--[[ Upvalues[2]:
+					[1]: arg1 (readonly)
+					[2]: Network_upvr_2 (copied, readonly)
+				]]
+				if arg1.Rig:GetAttribute("Stunned") then
+					arg1.Behavior.RevertObservance(arg1, false)
+					arg1.Behavior.ToggleGeneratorAura(arg1, false)
+					Network_upvr_2:FireClientConnection(arg1.Player, `{arg1.Player.Name}ObservantTeleport`, "REMOTE_EVENT")
+				end
+			end)
+			Util_upvr:CreateSpeedMultiplier(arg1.Rig, arg1.Config.ObservantSpeed, "NoliObserving")
+			task.delay(0.5, function() -- Line 1262
+				--[[ Upvalues[1]:
+					[1]: arg1 (readonly)
+				]]
+				arg1.AbilitiesDisabled = false
+			end)
+			return {
+				Result = true;
+			}
+		end
+		if RunService_upvr:IsClient() then
+			if not arg2 then return end
+			arg1.Behavior.Observing = arg2.Result
+			if arg1.Behavior.Observing then
+				local RaycastParams_new_result1_upvr_2 = RaycastParams.new()
+				RaycastParams_new_result1_upvr_2.FilterDescendantsInstances = {}
+				RaycastParams_new_result1_upvr_2.FilterType = Enum.RaycastFilterType.Include
+				local function addGenerator_upvr(arg1_25) -- Line 1282, Named "addGenerator"
+					--[[ Upvalues[3]:
+						[1]: arg1 (readonly)
+						[2]: Network_upvr_2 (copied, readonly)
+						[3]: RaycastParams_new_result1_upvr_2 (readonly)
+					]]
+					local clone_3 = arg1.Config.ObservantHighlight:Clone()
+					clone_3.Name = "ObservingHighlight"
+					clone_3.Parent = script
+					clone_3.Adornee = arg1_25
+					local clone = arg1.Config.ObservantTeleportButton:Clone()
+					clone.Parent = arg1.Player.PlayerGui
+					clone.Adornee = arg1_25
+					clone.ImageButton.MouseButton1Click:Connect(function() -- Line 1294
+						--[[ Upvalues[3]:
+							[1]: Network_upvr_2 (copied, readonly)
+							[2]: arg1 (copied, readonly)
+							[3]: arg1_25 (readonly)
+						]]
+						Network_upvr_2:FireServerConnection(`{arg1.Player.Name}ObservantTeleport`, "REMOTE_EVENT", arg1_25)
+					end)
+					local tbl_25 = {
+						Highlight = clone_3;
+						Button = clone;
+					}
+					tbl_25.Instance = arg1_25
+					arg1.Behavior.Generators[arg1_25] = tbl_25
+					RaycastParams_new_result1_upvr_2:AddToFilter(arg1_25)
+				end
+				arg1.Behavior.Generators = {}
+				arg1.Behavior.AddedGeneratorConnection = workspace.Map.Ingame.Map.ChildAdded:Connect(function(arg1_26) -- Line 1305
+					--[[ Upvalues[1]:
+						[1]: addGenerator_upvr (readonly)
+					]]
+					if arg1_26.Name == "Generator" or arg1_26.Name == "FakeGenerator" then
+						addGenerator_upvr(arg1_26)
+					end
+				end)
+				for _, v_9 in ipairs(workspace.Map.Ingame.Map:GetChildren()) do
+					if v_9.Name == "Generator" or v_9.Name == "FakeGenerator" then
+						addGenerator_upvr(v_9)
+					end
+				end
+				return
+			end
+			addGenerator_upvr = arg1.Behavior
+			RaycastParams_new_result1_upvr_2 = addGenerator_upvr.RevertObservance
+			addGenerator_upvr = arg1
+			RaycastParams_new_result1_upvr_2(addGenerator_upvr, false)
+		end
+	end;
+}
+module.Abilities = tbl_3
+function module.ToggleGeneratorAura(arg1, arg2, arg3) -- Line 1327
+	--[[ Upvalues[3]:
+		[1]: RunService_upvr (readonly)
+		[2]: Sounds_upvr (readonly)
+		[3]: TweenService_upvr (readonly)
+	]]
+	-- KONSTANTERROR: [0] 1. Error Block 29 start (CF ANALYSIS FAILED)
+	assert(RunService_upvr:IsServer(), "what are you doing")
+	local Map_3 = workspace.Map.Ingame:FindFirstChild("Map")
+	if not Map_3 then return end
+	local ipairs_result1, ipairs_result2, ipairs_result3_3 = ipairs(Map_3:GetChildren())
+	-- KONSTANTERROR: [0] 1. Error Block 29 end (CF ANALYSIS FAILED)
+	-- KONSTANTERROR: [183] 126. Error Block 26 start (CF ANALYSIS FAILED)
+	-- KONSTANTERROR: [183] 126. Error Block 26 end (CF ANALYSIS FAILED)
+	-- KONSTANTERROR: [38] 27. Error Block 4 start (CF ANALYSIS FAILED)
+	-- KONSTANTWARNING: Failed to evaluate expression, replaced with nil [183.10]
+	-- KONSTANTERROR: [38] 27. Error Block 4 end (CF ANALYSIS FAILED)
+end
+function module.RevertObservance(arg1, arg2) -- Line 1386
+	--[[ Upvalues[2]:
+		[1]: RunService_upvr (readonly)
+		[2]: Util_upvr (readonly)
+	]]
+	local var417
+	if RunService_upvr:IsServer() then
+		var417 = arg1.Behavior
+		if not var417.Observing then
+		else
+			if arg1.ObservantConnection then
+				arg1.ObservantConnection:Disconnect()
+				arg1.ObservantConnection = nil
+			end
+			var417 = false
+			arg1.Behavior.Observing = var417
+			local Config_3 = arg1.Config
+			if not arg2 then
+				Config_3 = 2
+			else
+				Config_3 = 1
+			end
+			arg1:SetCooldownOf("Observant", Config_3.ObservantC00ldown / Config_3)
+			arg1.DisabledAbilities = nil
+			arg1.AbilitiesDisabled = true
+			Util_upvr:CreateSpeedMultiplier(arg1.Rig, 1, "NoliObserving", 0)
+			local function INLINED_7() -- Internal function, doesn't exist in bytecode
+				var417 = arg1.Config.ObservantTeleportWindup + arg1.Config.ObservantTeleportEndlag
+				return var417
+			end
+			if not arg2 or not INLINED_7() then
+				var417 = 0.5
+			end
+			task.delay(var417, function() -- Line 1411
+				--[[ Upvalues[1]:
+					[1]: arg1 (readonly)
+				]]
+				arg1.AbilitiesDisabled = false
+			end)
+		end
+	end
+	if RunService_upvr:IsClient() then
+		if not arg1.Behavior.Generators then return end
+		local Generators = arg1.Behavior.Generators
+		if not Generators then
+			Generators = {}
+		end
+		for _, v_10 in pairs(Generators) do
+			if v_10.Highlight then
+				v_10.Highlight:Destroy()
+			end
+			if v_10.Button then
+				v_10.Button:Destroy()
+			end
+		end
+		arg1.Behavior.Generators = nil
+		if arg1.Behavior.AddedGeneratorConnection then
+			arg1.Behavior.AddedGeneratorConnection:Disconnect()
+		end
+	end
+end
+function module.Teleport(arg1, arg2) -- Line 1432
+	local var424
+	local function INLINED_8() -- Internal function, doesn't exist in bytecode
+		var424 = CFrame.new(arg2)
+		return var424
+	end
+	if typeof(arg2) ~= "Vector3" or not INLINED_8() then
+		var424 = arg2
+	end
+	arg1.Rig.PrimaryPart.CFrame = var424
+end
+local Debris_upvr = game:GetService("Debris")
+function module.DetonateVoidstar(arg1, arg2, arg3) -- Line 1442
+	--[[ Upvalues[8]:
+		[1]: RunService_upvr (readonly)
+		[2]: Util_upvr (readonly)
+		[3]: Sounds_upvr (readonly)
+		[4]: Hitboxes_upvr (readonly)
+		[5]: Debris_upvr (readonly)
+		[6]: TweenService_upvr (readonly)
+		[7]: Players_upvr (readonly)
+		[8]: Network_upvr_2 (readonly)
+	]]
+	-- KONSTANTWARNING: Variable analysis failed. Output will have some incorrect variable assignments
+	assert(RunService_upvr:IsServer(), "what are you doing")
+	assert(arg2, "no voidstar :(")
+	assert(arg1, "use dot notation when calling")
+	local Explosion = arg2:FindFirstChild("Explosion")
+	if Explosion and Explosion.ClassName == "Attachment" then
+		Explosion.Parent = workspace.Terrain
+		Explosion.WorldCFrame = Explosion.WorldCFrame
+		Util_upvr:EmitParticles(Explosion)
+		Sounds_upvr:Play(arg1.Config.Sounds.Explosion, {
+			Parent = Explosion;
+		})
+		game.Debris:AddItem(Explosion, 6)
+	end
+	local _, any_ToEulerAnglesXYZ_result2, _ = arg2.CFrame:ToEulerAnglesXYZ()
+	local tbl_27 = {
+		Size = Vector3.new(1, 1, 1) * arg1.Config.ImplantExplosionRadius;
+		CFrame = CFrame.new(arg2.CFrame.Position) * CFrame.Angles(0, any_ToEulerAnglesXYZ_result2, 0);
+	}
+	local Config = arg1.Config
+	if arg3 then
+		Config = 2
+	else
+		Config = 1
+	end
+	tbl_27.Damage = Config.ImplantExplosionDamage / Config
+	tbl_27.Time = 0.05
+	tbl_27.HitMultiple = true
+	tbl_27.Knockback = false
+	tbl_27.ExecuteOnKill = false
+	tbl_27.IsProjectile = true
+	tbl_27.PredictVelocity = false
+	tbl_27.Connections = {
+		Hit = function(arg1_28) -- Line 1483, Named "Hit"
+			--[[ Upvalues[4]:
+				[1]: arg2 (readonly)
+				[2]: Debris_upvr (copied, readonly)
+				[3]: Util_upvr (copied, readonly)
+				[4]: TweenService_upvr (copied, readonly)
+			]]
+			local PrimaryPart_upvr_2 = arg1_28.PrimaryPart
+			local BodyPosition = Instance.new("BodyPosition", PrimaryPart_upvr_2)
+			BodyPosition.Position = arg2.Position
+			BodyPosition.MaxForce = Vector3.new(10000, 7000, 10000)
+			BodyPosition.P = 16000
+			BodyPosition.D = 440
+			Debris_upvr:AddItem(BodyPosition, 0.35)
+			task.delay(0.35, function() -- Line 1494
+				--[[ Upvalues[1]:
+					[1]: PrimaryPart_upvr_2 (readonly)
+				]]
+				if PrimaryPart_upvr_2 then
+					local var472 = PrimaryPart_upvr_2
+					var472.AssemblyLinearVelocity /= 1000
+				end
+			end)
+			TweenService_upvr:Create(Util_upvr:CreateSpeedMultiplier(arg1_28, 0.5, "VoidstarExplosion", 0.7), TweenInfo.new(0.7), {
+				Value = 1;
+			}):Play()
+		end;
+	}
+	for _, v_11 in ipairs(Players_upvr:GetPlayers()) do
+		Config = v_11.Character
+		local var477 = Config
+		if var477 then
+			var477 = v_11.Character.PrimaryPart
+			if var477 then
+				var477 = v_11.Character.PrimaryPart.Position
+			end
+		end
+		if var477 then
+			local Magnitude_4 = (arg2.Position - var477).Magnitude
+		end
+		local var479 = arg1.Config.ImplantExplosionRadius * 2
+		if Magnitude_4 and Magnitude_4 < var479 then
+			Network_upvr_2:FireClientConnection(v_11, "ApplyCameraShake", "REMOTE_EVENT", math.clamp(var479 - Magnitude_4, 0, var479) / var479 * 0.5, 0.7)
+		end
+	end
+	arg2:Destroy()
+end
+function module.EnableVoidstar(arg1) -- Line 1521
+	--[[ Upvalues[1]:
+		[1]: Util_upvr (readonly)
+	]]
+	assert(arg1, "must pass killerInfo as argument")
+	local var480
+	if arg1.Behavior.VoidstarEnabled then
+	else
+		var480 = true
+		arg1.Behavior.VoidstarEnabled = var480
+		var480 = arg1.Rig
+		if var480 then
+			var480 = arg1.Rig:FindFirstChild("Voidstar")
+		end
+		if var480 then
+			var480.Transparency = 0
+			var480.Main.Main.Enabled = true
+			Util_upvr:EmitParticles(Util_upvr:MergeTables({var480.Appear1, var480.Appear2}, var480.AppearT:GetChildren()))
+		end
+	end
+end
+function module.DisableVoidstar(arg1) -- Line 1537
+	assert(arg1, "must pass killerInfo as argument")
+	local var483
+	if not arg1.Behavior.VoidstarEnabled then
+	else
+		var483 = false
+		arg1.Behavior.VoidstarEnabled = var483
+		var483 = arg1.Rig
+		if var483 then
+			var483 = arg1.Rig:FindFirstChild("Voidstar")
+		end
+		if var483 then
+			var483.Main.Main.Enabled = false
+			var483.Main.Main:Clear()
+			var483.Transparency = 1
+		end
+	end
+end
+return module
