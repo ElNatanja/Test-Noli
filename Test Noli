@@ -1,3 +1,5 @@
+--// VOIDSTAR SCRIPT COMPLETO
+
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -27,7 +29,7 @@ local headOffsets = {
 	["Voidstar"] = CFrame.new(-0.8, -1.5, -0.5)
 }
 
-local voidstarMotor, voidstarOriginal, voidstarCopy, voidstarThrown = nil, nil, nil, nil
+local voidstarMotor, voidstarOriginal, voidstarThrown = nil, nil, nil
 local soundId = "rbxassetid://99558901806521"
 
 local function weldAccessory(partToAttach, accessory)
@@ -138,11 +140,11 @@ RunService.Heartbeat:Connect(function(dt)
 	voidstarMotor.C0 *= CFrame.Angles(math.rad(currentSpeed * dt), 0, 0)
 end)
 
-local function playSound(parent)
+local function playSound(_)
 	local sound = Instance.new("Sound")
 	sound.SoundId = soundId
 	sound.Volume = 1.5
-	sound.Parent = parent
+	sound.Parent = character
 	sound:Play()
 	sound.Ended:Connect(function() sound:Destroy() end)
 end
@@ -174,7 +176,7 @@ end
 
 local function launchVoidstar()
 	if voidstarThrown and voidstarThrown.Parent then
-		playSound(voidstarThrown)
+		playSound()
 		voidstarThrown:Destroy()
 		voidstarThrown = nil
 	end
@@ -197,56 +199,55 @@ local function launchVoidstar()
 
 	if not closestPlayer then return end
 
-	local copy = voidstarOriginal:Clone()
-	copy.Anchored = false
-	copy.CanCollide = true
-	copy.Transparency = 0
-	copy.CFrame = hrp.CFrame * CFrame.new(0, 0, -2)
-	copy.Parent = workspace
-
-	local velocity = (closestPlayer.Character.HumanoidRootPart.Position - hrp.Position).Unit * 35
-	local bv = Instance.new("BodyVelocity")
-	bv.MaxForce = Vector3.new(1e5, 1e5, 1e5)
-	bv.Velocity = velocity
-	bv.Parent = copy
-
-	voidstarThrown = copy
-	voidstarOriginal.Transparency = 1
-	activateAppearEffects(voidstarOriginal)
-
 	task.delay(1, function()
-		voidstarOriginal.Transparency = 0
-	end)
+		local copy = voidstarOriginal:Clone()
+		copy.Anchored = false
+		copy.CanCollide = true
+		copy.Transparency = 0
+		copy.CFrame = hrp.CFrame * CFrame.new(0, 0, -2)
+		copy.Parent = workspace
 
-	task.delay(0.05, function()
-		if not copy:IsDescendantOf(workspace) then return end
-		copy.Touched:Connect(function(hit)
-			local hPlayer = Players:GetPlayerFromCharacter(hit.Parent)
-			if hPlayer and hPlayer ~= player and voidstarThrown then
-				playSound(voidstarThrown)
-				voidstarThrown:Destroy()
-				voidstarThrown = nil
-			elseif hit:IsA("BasePart") and hit.Parent == workspace and voidstarThrown then
-				playSound(voidstarThrown)
-				voidstarThrown:Destroy()
-				voidstarThrown = nil
+		local velocity = (closestPlayer.Character.HumanoidRootPart.Position - hrp.Position).Unit * 35
+		local bv = Instance.new("BodyVelocity")
+		bv.MaxForce = Vector3.new(1e5, 1e5, 1e5)
+		bv.Velocity = velocity
+		bv.Parent = copy
+
+		voidstarThrown = copy
+		voidstarOriginal.Transparency = 1
+		activateAppearEffects(voidstarOriginal)
+
+		task.delay(1, function()
+			voidstarOriginal.Transparency = 0
+		end)
+
+		task.delay(0.05, function()
+			if not copy:IsDescendantOf(workspace) then return end
+			copy.Touched:Connect(function(hit)
+				local hPlayer = Players:GetPlayerFromCharacter(hit.Parent)
+				if hPlayer and hPlayer ~= player and voidstarThrown then
+					playSound()
+					voidstarThrown:Destroy()
+					voidstarThrown = nil
+				elseif hit:IsA("BasePart") and hit.Parent == workspace and voidstarThrown then
+					playSound()
+					voidstarThrown:Destroy()
+					voidstarThrown = nil
+				end
+			end)
+		end)
+
+		task.delay(2, function()
+			if copy then
+				copy.Transparency = 0
 			end
 		end)
 	end)
-
-	task.delay(2, function()
-		if copy then
-			copy.Transparency = 0
-		end
-	end)
 end
 
--- Nueva lógica: al presionar E, esperar 1 segundo y lanzar la Voidstar
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
 	if gameProcessed then return end
 	if input.KeyCode == Enum.KeyCode.E then
-		task.delay(1, function()
-			launchVoidstar()
-		end)
+		launchVoidstar()
 	end
 end)
