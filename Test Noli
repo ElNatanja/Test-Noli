@@ -1,8 +1,9 @@
+--// VOIDSTAR SCRIPT COMPLETO
+
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
-local TweenService = game:GetService("TweenService")
 
 local player = Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
@@ -28,9 +29,7 @@ local headOffsets = {
 	["Voidstar"] = CFrame.new(-0.8, -1.5, -0.5)
 }
 
-local voidstarMotor, voidstarOriginal = nil, nil
-local voidstarThrown = nil
-local voidstarRCopy = nil
+local voidstarMotor, voidstarOriginal, voidstarThrown = nil, nil, nil
 local soundId = "rbxassetid://99558901806521"
 
 local function weldAccessory(partToAttach, accessory)
@@ -110,52 +109,42 @@ local function main()
 		end
 	end
 
-	local hrpRig = rig:FindFirstChild("HumanoidRootPart")
-	local hrpPlayer = character:FindFirstChild("HumanoidRootPart")
-	if hrpRig and hrpPlayer then
-		local shadowPuddle = hrpRig:FindFirstChild("ShadowPuddle")
+	local hrp = rig:FindFirstChild("HumanoidRootPart")
+	if hrp then
+		local shadowPuddle = hrp:FindFirstChild("ShadowPuddle")
 		if shadowPuddle and shadowPuddle:IsA("Attachment") then
-			local cloneAttachment = shadowPuddle:Clone()
-			cloneAttachment.Parent = hrpPlayer
+			local hrpPlayer = character:FindFirstChild("HumanoidRootPart")
+			if hrpPlayer then
+				shadowPuddle:Clone().Parent = hrpPlayer
+			end
 		end
 	end
 end
 
 main()
 
--- Rotación Voidstar original
 local elapsedTime, cycleDuration, maxRotationSpeed = 0, 2, 1000
 local rotatingCycle = true
 
 RunService.Heartbeat:Connect(function(dt)
-	if voidstarMotor then
-		elapsedTime += dt
-		if elapsedTime > cycleDuration then
-			elapsedTime -= cycleDuration
-			rotatingCycle = not rotatingCycle
-		end
-		local alpha = rotatingCycle and math.sin((elapsedTime / cycleDuration) * math.pi / 2)
-			or math.cos((elapsedTime / cycleDuration) * math.pi / 2)
-		local currentSpeed = maxRotationSpeed * alpha
-		voidstarMotor.C0 *= CFrame.Angles(math.rad(currentSpeed * dt), 0, 0)
+	if not voidstarMotor then return end
+	elapsedTime = elapsedTime + dt
+	if elapsedTime > cycleDuration then
+		elapsedTime -= cycleDuration
+		rotatingCycle = not rotatingCycle
 	end
-
-	-- Rotación Voidstar copia R
-	if voidstarRCopy and voidstarRCopy:IsDescendantOf(workspace) then
-		if not voidstarRCopy.StartTime then
-			voidstarRCopy.StartTime = tick()
-		end
-		local timeElapsed = tick() - voidstarRCopy.StartTime
-		local spinSpeed = timeElapsed < 0.1 and (2000 * (timeElapsed / 0.1)) or 2000
-		voidstarRCopy.CFrame *= CFrame.Angles(0, math.rad(spinSpeed * dt), 0)
-	end
+	local alpha = rotatingCycle
+		and math.sin((elapsedTime / cycleDuration) * math.pi / 2)
+		or math.cos((elapsedTime / cycleDuration) * math.pi / 2)
+	local currentSpeed = maxRotationSpeed * alpha
+	voidstarMotor.C0 *= CFrame.Angles(math.rad(currentSpeed * dt), 0, 0)
 end)
 
-local function playSound(parent)
+local function playSound(_)
 	local sound = Instance.new("Sound")
 	sound.SoundId = soundId
 	sound.Volume = 1.5
-	sound.Parent = parent or character
+	sound.Parent = character
 	sound:Play()
 	sound.Ended:Connect(function() sound:Destroy() end)
 end
@@ -187,12 +176,13 @@ end
 
 local function launchVoidstar()
 	if voidstarThrown and voidstarThrown.Parent then
-		playSound(voidstarThrown)
+		playSound()
 		voidstarThrown:Destroy()
 		voidstarThrown = nil
 	end
 
 	if not voidstarOriginal then return end
+
 	local hrp = character:FindFirstChild("HumanoidRootPart")
 	if not hrp then return end
 
@@ -211,7 +201,6 @@ local function launchVoidstar()
 
 	task.delay(1, function()
 		local copy = voidstarOriginal:Clone()
-		copy.Name = "VoidstarThrownCopy"
 		copy.Anchored = false
 		copy.CanCollide = true
 		copy.Transparency = 0
@@ -237,7 +226,11 @@ local function launchVoidstar()
 			copy.Touched:Connect(function(hit)
 				local hPlayer = Players:GetPlayerFromCharacter(hit.Parent)
 				if hPlayer and hPlayer ~= player and voidstarThrown then
-					playSound(copy)
+					playSound()
+					voidstarThrown:Destroy()
+					voidstarThrown = nil
+				elseif hit:IsA("BasePart") and hit.Parent == workspace and voidstarThrown then
+					playSound()
 					voidstarThrown:Destroy()
 					voidstarThrown = nil
 				end
@@ -245,37 +238,16 @@ local function launchVoidstar()
 		end)
 
 		task.delay(2, function()
-			if copy and copy.Parent then
+			if copy then
 				copy.Transparency = 0
 			end
 		end)
 	end)
 end
 
-local function spawnVoidstarRCopy()
-	if voidstarRCopy and voidstarRCopy.Parent then
-		voidstarRCopy:Destroy()
-	end
-	local hrp = character:FindFirstChild("HumanoidRootPart")
-	if not hrp or not voidstarOriginal then return end
-
-	local clone = voidstarOriginal:Clone()
-	clone.Anchored = true
-	clone.CanCollide = false
-	clone.Transparency = 0
-	clone.CFrame = hrp.CFrame * CFrame.new(0, 0, -3)
-	clone.Parent = workspace
-	voidstarRCopy = clone
-end
-
-UserInputService.InputBegan:Connect(function(input, processed)
-	if processed then return end
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+	if gameProcessed then return end
 	if input.KeyCode == Enum.KeyCode.E then
-		local humanoid = character:FindFirstChildOfClass("Humanoid")
-		if humanoid and humanoid.MoveDirection.Magnitude > 0 then
-			launchVoidstar()
-		end
-	elseif input.KeyCode == Enum.KeyCode.R then
-		spawnVoidstarRCopy()
+		launchVoidstar()
 	end
 end)
