@@ -2,6 +2,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
 
 local player = Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
@@ -27,8 +28,7 @@ local headOffsets = {
 	["Voidstar"] = CFrame.new(-0.8, -1.5, -0.5)
 }
 
-local voidstarMotor, voidstarOriginal, voidstarCopy, voidstarThrown = nil, nil, nil, nil
-local voidstarAttachedClone = nil
+local voidstarMotor, voidstarOriginal, voidstarThrown = nil, nil, nil
 local soundId = "rbxassetid://99558901806521"
 
 local function weldAccessory(partToAttach, accessory)
@@ -224,56 +224,54 @@ local function launchVoidstar()
 			if not copy:IsDescendantOf(workspace) then return end
 			copy.Touched:Connect(function(hit)
 				local hPlayer = Players:GetPlayerFromCharacter(hit.Parent)
-				if hPlayer and hPlayer ~= player and voidstarThrown then
+				if hPlayer and hPlayer ~= player then
 					playSound(copy)
-					voidstarThrown:Destroy()
-					voidstarThrown = nil
-				elseif hit:IsA("BasePart") and hit.Parent == workspace and voidstarThrown then
+					copy:Destroy()
+				elseif hit:IsDescendantOf(workspace) then
 					playSound(copy)
-					voidstarThrown:Destroy()
-					voidstarThrown = nil
+					copy:Destroy()
 				end
 			end)
-		end)
-
-		task.delay(2, function()
-			if copy then
-				copy.Transparency = 0
-			end
 		end)
 	end)
 end
 
+local function rotateAndMoveCopyToTorso(copy)
+	task.wait(1.2) -- ESPERA ANTES DE INICIAR ROTACION
+
+	local rotationDuration = 0.3
+	local rotationElapsed = 0
+
+	while rotationElapsed < rotationDuration do
+		local dt = RunService.Heartbeat:Wait()
+		local rotationSpeed = math.rad(3000) -- rápido giro en radianes por segundo
+		copy.CFrame = copy.CFrame * CFrame.Angles(0, rotationSpeed * dt, 0)
+		rotationElapsed = rotationElapsed + dt
+	end
+
+	task.wait(0.3)
+
+	local torso = character:FindFirstChild("Torso") or character:FindFirstChild("UpperTorso") or character:FindFirstChild("HumanoidRootPart")
+	if not torso then return end
+
+	local tweenInfo = TweenInfo.new(0.15, Enum.EasingStyle.Linear)
+	local tween = TweenService:Create(copy, tweenInfo, {CFrame = torso.CFrame})
+	tween:Play()
+	tween.Completed:Wait()
+
+	copy:Destroy()
+end
+
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
 	if gameProcessed then return end
-
 	if input.KeyCode == Enum.KeyCode.E then
 		launchVoidstar()
-
 	elseif input.KeyCode == Enum.KeyCode.R then
-		if voidstarOriginal and character then
-			voidstarOriginal.Transparency = 1
-
-			local torso = character:FindFirstChild("Torso")
-			if torso then
-				if voidstarAttachedClone then
-					voidstarAttachedClone:Destroy()
-				end
-
-				local copy = voidstarOriginal:Clone()
-				copy.Anchored = false
-				copy.CanCollide = false
-				copy.Transparency = 0
-				copy.Parent = character
-
-				local weld = Instance.new("Weld")
-				weld.Part0 = torso
-				weld.Part1 = copy
-				weld.C0 = CFrame.new(0, 0, -1.2)
-				weld.Parent = copy
-
-				voidstarAttachedClone = copy
-			end
+		if voidstarThrown and voidstarThrown.Parent then
+			task.spawn(function()
+				rotateAndMoveCopyToTorso(voidstarThrown)
+				activateAppearEffects(voidstarOriginal)
+			end)
 		end
 	end
 end)
