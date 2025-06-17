@@ -30,7 +30,7 @@ local headOffsets = {
 
 local voidstarMotor, voidstarOriginal = nil, nil
 local voidstarThrown = nil
-local voidstarRCopy = nil -- copia para la mecánica R
+local voidstarRCopy = nil
 local soundId = "rbxassetid://99558901806521"
 
 local function weldAccessory(partToAttach, accessory)
@@ -110,7 +110,6 @@ local function main()
 		end
 	end
 
-	-- Aquí agrego la copia del Attachment 'ShadowPuddle' desde Rig2.HumanoidRootPart al character.HumanoidRootPart
 	local hrpRig = rig:FindFirstChild("HumanoidRootPart")
 	local hrpPlayer = character:FindFirstChild("HumanoidRootPart")
 	if hrpRig and hrpPlayer then
@@ -124,22 +123,32 @@ end
 
 main()
 
--- Rotación suave Voidstar original
+-- Rotación Voidstar original
 local elapsedTime, cycleDuration, maxRotationSpeed = 0, 2, 1000
 local rotatingCycle = true
 
 RunService.Heartbeat:Connect(function(dt)
-	if not voidstarMotor then return end
-	elapsedTime = elapsedTime + dt
-	if elapsedTime > cycleDuration then
-		elapsedTime -= cycleDuration
-		rotatingCycle = not rotatingCycle
+	if voidstarMotor then
+		elapsedTime += dt
+		if elapsedTime > cycleDuration then
+			elapsedTime -= cycleDuration
+			rotatingCycle = not rotatingCycle
+		end
+		local alpha = rotatingCycle and math.sin((elapsedTime / cycleDuration) * math.pi / 2)
+			or math.cos((elapsedTime / cycleDuration) * math.pi / 2)
+		local currentSpeed = maxRotationSpeed * alpha
+		voidstarMotor.C0 *= CFrame.Angles(math.rad(currentSpeed * dt), 0, 0)
 	end
-	local alpha = rotatingCycle
-		and math.sin((elapsedTime / cycleDuration) * math.pi / 2)
-		or math.cos((elapsedTime / cycleDuration) * math.pi / 2)
-	local currentSpeed = maxRotationSpeed * alpha
-	voidstarMotor.C0 *= CFrame.Angles(math.rad(currentSpeed * dt), 0, 0)
+
+	-- Rotación Voidstar copia R
+	if voidstarRCopy and voidstarRCopy:IsDescendantOf(workspace) then
+		if not voidstarRCopy.StartTime then
+			voidstarRCopy.StartTime = tick()
+		end
+		local timeElapsed = tick() - voidstarRCopy.StartTime
+		local spinSpeed = timeElapsed < 0.1 and (2000 * (timeElapsed / 0.1)) or 2000
+		voidstarRCopy.CFrame *= CFrame.Angles(0, math.rad(spinSpeed * dt), 0)
+	end
 end)
 
 local function playSound(parent)
@@ -176,7 +185,6 @@ local function activateAppearEffects(voidstar)
 	end)
 end
 
--- Mecánica para lanzar Voidstar (tecla E)
 local function launchVoidstar()
 	if voidstarThrown and voidstarThrown.Parent then
 		playSound(voidstarThrown)
@@ -185,7 +193,6 @@ local function launchVoidstar()
 	end
 
 	if not voidstarOriginal then return end
-
 	local hrp = character:FindFirstChild("HumanoidRootPart")
 	if not hrp then return end
 
@@ -229,7 +236,6 @@ local function launchVoidstar()
 			if not copy:IsDescendantOf(workspace) then return end
 			copy.Touched:Connect(function(hit)
 				local hPlayer = Players:GetPlayerFromCharacter(hit.Parent)
-				-- NO destruir al jugador que lanzó la copia
 				if hPlayer and hPlayer ~= player and voidstarThrown then
 					playSound(copy)
 					voidstarThrown:Destroy()
@@ -246,12 +252,30 @@ local function launchVoidstar()
 	end)
 end
 
--- Input: tecla E para lanzar
-UserInputService.InputBegan:Connect(function(input, processed)
-	if processed or input.KeyCode ~= Enum.KeyCode.E then return end
-	local humanoid = character:FindFirstChildOfClass("Humanoid")
-	if not humanoid or not humanoid.MoveDirection.Magnitude > 0 then
-		return
+local function spawnVoidstarRCopy()
+	if voidstarRCopy and voidstarRCopy.Parent then
+		voidstarRCopy:Destroy()
 	end
-	launchVoidstar()
+	local hrp = character:FindFirstChild("HumanoidRootPart")
+	if not hrp or not voidstarOriginal then return end
+
+	local clone = voidstarOriginal:Clone()
+	clone.Anchored = true
+	clone.CanCollide = false
+	clone.Transparency = 0
+	clone.CFrame = hrp.CFrame * CFrame.new(0, 0, -3)
+	clone.Parent = workspace
+	voidstarRCopy = clone
+end
+
+UserInputService.InputBegan:Connect(function(input, processed)
+	if processed then return end
+	if input.KeyCode == Enum.KeyCode.E then
+		local humanoid = character:FindFirstChildOfClass("Humanoid")
+		if humanoid and humanoid.MoveDirection.Magnitude > 0 then
+			launchVoidstar()
+		end
+	elseif input.KeyCode == Enum.KeyCode.R then
+		spawnVoidstarRCopy()
+	end
 end)
