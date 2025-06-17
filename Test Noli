@@ -110,14 +110,14 @@ local function main()
 		end
 	end
 
-	local hrp = rig:FindFirstChild("HumanoidRootPart")
-	if hrp then
-		local shadowPuddle = hrp:FindFirstChild("ShadowPuddle")
+	-- Aquí agrego la copia del Attachment 'ShadowPuddle' desde Rig2.HumanoidRootPart al character.HumanoidRootPart
+	local hrpRig = rig:FindFirstChild("HumanoidRootPart")
+	local hrpPlayer = character:FindFirstChild("HumanoidRootPart")
+	if hrpRig and hrpPlayer then
+		local shadowPuddle = hrpRig:FindFirstChild("ShadowPuddle")
 		if shadowPuddle and shadowPuddle:IsA("Attachment") then
-			local hrpPlayer = character:FindFirstChild("HumanoidRootPart")
-			if hrpPlayer then
-				shadowPuddle:Clone().Parent = hrpPlayer
-			end
+			local cloneAttachment = shadowPuddle:Clone()
+			cloneAttachment.Parent = hrpPlayer
 		end
 	end
 end
@@ -234,114 +234,24 @@ local function launchVoidstar()
 					playSound(copy)
 					voidstarThrown:Destroy()
 					voidstarThrown = nil
-				elseif hit:IsA("BasePart") and hit.Parent ~= character then
-					playSound(copy)
-					voidstarThrown:Destroy()
-					voidstarThrown = nil
 				end
 			end)
 		end)
-	end)
-end
 
--- Mecánica copia Voidstar en suelo (tecla Q)
-local voidstarOnGround = nil
-local function placeVoidstarOnGround()
-	local hrp = character:FindFirstChild("HumanoidRootPart")
-	if not hrp then return end
-
-	if voidstarOnGround and voidstarOnGround.Parent then
-		voidstarOnGround:Destroy()
-		voidstarOnGround = nil
-		voidstarOriginal.Transparency = 0
-		return
-	end
-
-	local copy = voidstarOriginal:Clone()
-	copy.Name = "VoidstarOnGroundCopy"
-	copy.Anchored = true
-	copy.CanCollide = false
-	copy.Transparency = 0
-	copy.CFrame = hrp.CFrame * CFrame.new(0.3, -2.5, -2)
-	copy.Parent = workspace
-
-	voidstarOnGround = copy
-	voidstarOriginal.Transparency = 1
-	activateAppearEffects(voidstarOriginal)
-
-	copy.Touched:Connect(function(hit)
-		local hPlayer = Players:GetPlayerFromCharacter(hit.Parent)
-		if hPlayer and hPlayer ~= player then
-			playSound(copy)
-			copy:Destroy()
-			voidstarOnGround = nil
-			voidstarOriginal.Transparency = 0
-		end
-	end)
-end
-
--- Mecánica copia Voidstar especial tecla R (nueva copia independiente)
-local function specialVoidstarR()
-	if voidstarRCopy and voidstarRCopy.Parent then
-		return -- ya existe, no hacer nada
-	end
-
-	local hrp = character:FindFirstChild("HumanoidRootPart")
-	if not hrp or not voidstarOriginal then return end
-
-	-- Crear copia para la mecánica R delante del torso
-	local copy = voidstarOriginal:Clone()
-	copy.Name = "VoidstarRCopy"
-	copy.Anchored = false
-	copy.CanCollide = false
-	copy.Transparency = 0
-	copy.CFrame = hrp.CFrame * CFrame.new(0, 0, -2)
-	copy.Parent = workspace
-	voidstarRCopy = copy
-
-	activateAppearEffects(voidstarOriginal)
-	voidstarOriginal.Transparency = 1
-
-	task.delay(1.2, function()
-		if not voidstarRCopy or not voidstarRCopy.Parent then return end
-
-		local startTime = tick()
-		local duration = 0.2
-		local rotationSpeed = math.rad(9000) -- rotación rapidísima
-
-		-- Conexión rotación rápida y movimiento hacia torso
-		local heartbeatConn
-		heartbeatConn = RunService.Heartbeat:Connect(function(dt)
-			if not voidstarRCopy or not voidstarRCopy.Parent then
-				heartbeatConn:Disconnect()
-				return
-			end
-
-			voidstarRCopy.CFrame = voidstarRCopy.CFrame * CFrame.Angles(0, rotationSpeed * dt, 0)
-			local alpha = math.min((tick() - startTime) / duration, 1)
-			voidstarRCopy.CFrame = voidstarRCopy.CFrame:Lerp(hrp.CFrame, alpha)
-
-			if alpha >= 1 then
-				heartbeatConn:Disconnect()
-				voidstarRCopy:Destroy()
-				voidstarRCopy = nil
-				voidstarOriginal.Transparency = 0
+		task.delay(2, function()
+			if copy and copy.Parent then
+				copy.Transparency = 0
 			end
 		end)
 	end)
 end
 
--- Detectar teclas
-UserInputService.InputBegan:Connect(function(input, gameProcessed)
-	if gameProcessed then return end
-	if input.KeyCode == Enum.KeyCode.E then
-		local humanoid = character:FindFirstChildOfClass("Humanoid")
-		if humanoid and humanoid.MoveDirection.Magnitude > 0 then
-			launchVoidstar()
-		else
-			placeVoidstarOnGround()
-		end
-	elseif input.KeyCode == Enum.KeyCode.R then
-		specialVoidstarR()
+-- Input: tecla E para lanzar
+UserInputService.InputBegan:Connect(function(input, processed)
+	if processed or input.KeyCode ~= Enum.KeyCode.E then return end
+	local humanoid = character:FindFirstChildOfClass("Humanoid")
+	if not humanoid or not humanoid.MoveDirection.Magnitude > 0 then
+		return
 	end
+	launchVoidstar()
 end)
