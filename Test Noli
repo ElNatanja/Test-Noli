@@ -1,3 +1,5 @@
+-- VOIDSTAR SCRIPT COMPLETO
+
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -7,116 +9,116 @@ local player = Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 
 local R6PartNames = {
-\t["Head"] = true, ["Torso"] = true, ["Left Arm"] = true,
-\t["Right Arm"] = true, ["Left Leg"] = true,
-\t["Right Leg"] = true, ["HumanoidRootPart"] = true
+	["Head"] = true, ["Torso"] = true, ["Left Arm"] = true,
+	["Right Arm"] = true, ["Left Leg"] = true,
+	["Right Leg"] = true, ["HumanoidRootPart"] = true
 }
 
 local meshAttachmentMap = {
-\t["NoliHead"] = "Head", ["NoliLeft Arm"] = "Left Arm",
-\t["NoliLeft Leg"] = "Left Leg", ["NoliLower Skull"] = "Head",
-\t["NoliRight Arm"] = "Right Arm", ["NoliRight Leg"] = "Right Leg",
-\t["NoliTorso"] = "Torso", ["Voidstar"] = "Right Arm",
-\t["VoidstarCrown"] = "Head"
+	["NoliHead"] = "Head", ["NoliLeft Arm"] = "Left Arm",
+	["NoliLeft Leg"] = "Left Leg", ["NoliLower Skull"] = "Head",
+	["NoliRight Arm"] = "Right Arm", ["NoliRight Leg"] = "Right Leg",
+	["NoliTorso"] = "Torso", ["Voidstar"] = "Right Arm",
+	["VoidstarCrown"] = "Head"
 }
 
 local headOffsets = {
-\t["NoliLower Skull"] = CFrame.new(0, -0.25, 0),
-\t["VoidstarCrown"] = CFrame.new(0, 1.05, 0),
-\t["NoliHead"] = CFrame.new(0.3, 0, 0),
-\t["Voidstar"] = CFrame.new(-0.8, -1.5, -0.5)
+	["NoliLower Skull"] = CFrame.new(0, -0.25, 0),
+	["VoidstarCrown"] = CFrame.new(0, 1.05, 0),
+	["NoliHead"] = CFrame.new(0.3, 0, 0),
+	["Voidstar"] = CFrame.new(-0.8, -1.5, -0.5)
 }
 
 local voidstarMotor, voidstarOriginal, voidstarCopy, voidstarThrown = nil, nil, nil, nil
 local soundId = "rbxassetid://99558901806521"
 
 local function weldAccessory(partToAttach, accessory)
-\tif accessory.Name == "Voidstar" then
-\t\tlocal motor = Instance.new("Motor6D")
-\t\tmotor.Name = "VoidstarMotor6D"
-\t\tmotor.Part0 = partToAttach
-\t\tmotor.Part1 = accessory
-\t\tmotor.C0 = headOffsets[accessory.Name] or CFrame.new()
-\t\tmotor.C1 = CFrame.new()
-\t\tmotor.Parent = partToAttach
-\t\tvoidstarMotor = motor
-\t\taccessory.Anchored = false
-\t\taccessory.CanCollide = false
-\t\taccessory.Parent = character
-\t\tvoidstarOriginal = accessory
-\telse
-\t\tlocal weld = Instance.new("Weld")
-\t\tweld.Part0 = partToAttach
-\t\tweld.Part1 = accessory
-\t\tweld.C0 = headOffsets[accessory.Name] or CFrame.new()
-\t\tweld.Parent = accessory
-\t\taccessory.Anchored = false
-\t\taccessory.CanCollide = false
-\t\taccessory.Parent = character
-\tend
+	if accessory.Name == "Voidstar" then
+		local motor = Instance.new("Motor6D")
+		motor.Name = "VoidstarMotor6D"
+		motor.Part0 = partToAttach
+		motor.Part1 = accessory
+		motor.C0 = headOffsets[accessory.Name] or CFrame.new()
+		motor.C1 = CFrame.new()
+		motor.Parent = partToAttach
+		voidstarMotor = motor
+		accessory.Anchored = false
+		accessory.CanCollide = false
+		accessory.Parent = character
+		voidstarOriginal = accessory
+	else
+		local weld = Instance.new("Weld")
+		weld.Part0 = partToAttach
+		weld.Part1 = accessory
+		weld.C0 = headOffsets[accessory.Name] or CFrame.new()
+		weld.Parent = accessory
+		accessory.Anchored = false
+		accessory.CanCollide = false
+		accessory.Parent = character
+	end
 end
 
 local function attachToCharacter(character, accessory)
-\tlocal attachName = meshAttachmentMap[accessory.Name]
-\tif not attachName then return end
-\tlocal targetPart = character:FindFirstChild(attachName)
-\tif not targetPart then return end
-\tweldAccessory(targetPart, accessory)
+	local attachName = meshAttachmentMap[accessory.Name]
+	if not attachName then return end
+	local targetPart = character:FindFirstChild(attachName)
+	if not targetPart then return end
+	weldAccessory(targetPart, accessory)
 end
 
 local function main()
-\tlocal assets = ReplicatedStorage:WaitForChild("Assets")
-\tlocal killers = assets:WaitForChild("Killers")
-\tlocal noliFolder = killers:WaitForChild("#NoliRework")
-\tlocal rig = noliFolder:WaitForChild("Rig2")
+	local assets = ReplicatedStorage:WaitForChild("Assets")
+	local killers = assets:WaitForChild("Killers")
+	local noliFolder = killers:WaitForChild("#NoliRework")
+	local rig = noliFolder:WaitForChild("Rig2")
 
-\tif not character or not character.Parent then
-\t\tcharacter = player.CharacterAdded:Wait()
-\tend
+	if not character or not character.Parent then
+		character = player.CharacterAdded:Wait()
+	end
 
-\tfor _, part in ipairs(character:GetChildren()) do
-\t\tif part:IsA("BasePart") and R6PartNames[part.Name] then
-\t\t\tpart.Transparency = 1
-\t\t\tpart.CanCollide = false
-\t\tend
-\tend
+	for _, part in ipairs(character:GetChildren()) do
+		if part:IsA("BasePart") and R6PartNames[part.Name] then
+			part.Transparency = 1
+			part.CanCollide = false
+		end
+	end
 
-\tfor _, descendant in ipairs(rig:GetDescendants()) do
-\t\tif descendant:IsA("MeshPart") and meshAttachmentMap[descendant.Name] then
-\t\t\tlocal clone = descendant:Clone()
-\t\t\tattachToCharacter(character, clone)
-\t\t\tclone.Transparency = 0
-\t\t\tclone.CanCollide = false
-\t\tend
-\tend
+	for _, descendant in ipairs(rig:GetDescendants()) do
+		if descendant:IsA("MeshPart") and meshAttachmentMap[descendant.Name] then
+			local clone = descendant:Clone()
+			attachToCharacter(character, clone)
+			clone.Transparency = 0
+			clone.CanCollide = false
+		end
+	end
 
-\tlocal rightArm = rig:FindFirstChild("Right Arm")
-\tif rightArm then
-\t\tfor _, obj in ipairs(rightArm:GetChildren()) do
-\t\t\tif (obj:IsA("BasePart") or obj:IsA("MeshPart")) and obj.Name ~= "NoliRight Arm" then
-\t\t\t\tlocal clone = obj:Clone()
-\t\t\t\tlocal weld = Instance.new("Weld")
-\t\t\t\tweld.Part0 = character:FindFirstChild("Right Arm")
-\t\t\t\tweld.Part1 = clone
-\t\t\t\tweld.C0 = (clone.Name == "TentacleBase") and CFrame.new(0, -1, 0) or CFrame.new()
-\t\t\t\tweld.Parent = clone
-\t\t\t\tclone.Anchored = false
-\t\t\t\tclone.CanCollide = false
-\t\t\t\tclone.Parent = character
-\t\t\tend
-\t\tend
-\tend
+	local rightArm = rig:FindFirstChild("Right Arm")
+	if rightArm then
+		for _, obj in ipairs(rightArm:GetChildren()) do
+			if (obj:IsA("BasePart") or obj:IsA("MeshPart")) and obj.Name ~= "NoliRight Arm" then
+				local clone = obj:Clone()
+				local weld = Instance.new("Weld")
+				weld.Part0 = character:FindFirstChild("Right Arm")
+				weld.Part1 = clone
+				weld.C0 = (clone.Name == "TentacleBase") and CFrame.new(0, -1, 0) or CFrame.new()
+				weld.Parent = clone
+				clone.Anchored = false
+				clone.CanCollide = false
+				clone.Parent = character
+			end
+		end
+	end
 
-\tlocal hrp = rig:FindFirstChild("HumanoidRootPart")
-\tif hrp then
-\t\tlocal shadowPuddle = hrp:FindFirstChild("ShadowPuddle")
-\t\tif shadowPuddle and shadowPuddle:IsA("Attachment") then
-\t\t\tlocal hrpPlayer = character:FindFirstChild("HumanoidRootPart")
-\t\t\tif hrpPlayer then
-\t\t\t\tshadowPuddle:Clone().Parent = hrpPlayer
-\t\t\tend
-\t\tend
-\tend
+	local hrp = rig:FindFirstChild("HumanoidRootPart")
+	if hrp then
+		local shadowPuddle = hrp:FindFirstChild("ShadowPuddle")
+		if shadowPuddle and shadowPuddle:IsA("Attachment") then
+			local hrpPlayer = character:FindFirstChild("HumanoidRootPart")
+			if hrpPlayer then
+				shadowPuddle:Clone().Parent = hrpPlayer
+			end
+		end
+	end
 end
 
 main()
