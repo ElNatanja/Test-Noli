@@ -246,7 +246,6 @@ local function launchVoidstar()
 	end)
 end
 
--- ✅ NUEVA FUNCIÓN PARA LA TECLA R (voidstarIntoTorso)
 local function voidstarIntoTorso()
 	if not voidstarOriginal then return end
 
@@ -269,30 +268,25 @@ local function voidstarIntoTorso()
 
 	local angle = 0
 	local speed = 0
-	local spinning = false
+	local spinning = true
+
 	local connection
+	local startTime = tick()
 
-	task.delay(1.2, function()
-		spinning = true
-		local startTime = tick()
-
-		connection = RunService.Heartbeat:Connect(function(dt)
-			if not clone or not clone.Parent then
-				if connection then connection:Disconnect() end
-				return
+	connection = RunService.Heartbeat:Connect(function(dt)
+		if not clone or not clone.Parent then
+			connection:Disconnect()
+			return
+		end
+		clone.CFrame = torso.CFrame * CFrame.new(0, 0, -1.2)
+		if spinning then
+			if tick() - startTime <= 0.1 then
+				speed += 20000 * dt
+				if speed > 2000 then speed = 2000 end
 			end
-			clone.CFrame = torso.CFrame * CFrame.new(0, 0, -1.2)
-
-			if spinning then
-				local elapsed = tick() - startTime
-				if elapsed <= 0.1 then
-					speed += 20000 * dt
-					if speed > 2000 then speed = 2000 end
-				end
-				angle += speed * dt
-				clone.CFrame *= CFrame.Angles(0, math.rad(angle), 0)
-			end
-		end)
+			angle += speed * dt
+			clone.CFrame *= CFrame.Angles(0, math.rad(angle), 0)
+		end
 	end)
 
 	task.delay(1.5, function()
@@ -316,3 +310,12 @@ local function voidstarIntoTorso()
 		end)
 	end)
 end
+
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+	if gameProcessed then return end
+	if input.KeyCode == Enum.KeyCode.E then
+		launchVoidstar()
+	elseif input.KeyCode == Enum.KeyCode.R then
+		voidstarIntoTorso()
+	end
+end)
