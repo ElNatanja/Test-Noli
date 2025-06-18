@@ -245,123 +245,92 @@ local function launchVoidstar()
 	end)
 end
 
-local function rotateCopyWithAcceleration(copy, duration, targetSpeed)
+-- Función para rotar con aceleración
+local function rotateCopyWithAcceleration(copy, accelTime, maxDegreesPerSec)
+	local rotationSpeed = 0
 	local elapsed = 0
-	local speed = 0
+	local running = true
 
-	-- To update rotation each heartbeat while accelerating
 	local connection
 	connection = RunService.Heartbeat:Connect(function(dt)
-		if not copy or not copy.Parent then
+		if not running or not copy.Parent then
 			connection:Disconnect()
 			return
 		end
-		elapsed = elapsed + dt
-		if elapsed > duration then elapsed = duration end
 
-		-- Linear acceleration factor from 0 to 1
-		local alpha = elapsed / duration
-		speed = targetSpeed * alpha
-
-		copy.CFrame *= CFrame.Angles(0, math.rad(speed * dt), 0)
-
-		if elapsed >= duration then
-			connection:Disconnect()
-		end
-	end)
-
-	-- Return a function to keep rotating at full speed after acceleration
-	return function(keepDuration)
-		local fullSpeed = targetSpeed
-		local fullElapsed = 0
-		local conn2
-		conn2 = RunService.Heartbeat:Connect(function(dt)
-			if not copy or not copy.Parent then
-				conn2:Disconnect()
-				return
-			end
-			fullElapsed = fullElapsed + dt
-			if fullElapsed > keepDuration then
-				conn2:Disconnect()
-				return
-			end
-			copy.CFrame *= CFrame.Angles(0, math.rad(fullSpeed * dt), 0)
-		end)
-	end
-end
-
-local function createCopyAndAnimate()
-	if not voidstarOriginal then return end
-	local hrp = character:FindFirstChild("Torso") or character:FindFirstChild("UpperTorso") or character:FindFirstChild("HumanoidRootPart")
-	if not hrp then return end
-
-	-- Crear copia justo delante del torso con offset 1.2 en Z
-	local copy = voidstarOriginal:Clone()
-	copy.Anchored = false
-	copy.CanCollide = false
-	copy.Transparency = 0
-	copy.CFrame = hrp.CFrame * CFrame.new(0, 0, -1.2)
-	copy.Parent = workspace
-
-	-- Vincular para seguir el torso cada frame
-	local followConnection
-	followConnection = RunService.Heartbeat:Connect(function()
-		if copy and copy.Parent and hrp and hrp.Parent then
-			copy.CFrame = hrp.CFrame * CFrame.new(0, 0, -1.2)
+		if elapsed < accelTime then
+			rotationSpeed = (elapsed / accelTime) * maxDegreesPerSec
+			elapsed = elapsed + dt
 		else
-			if followConnection then
-				followConnection:Disconnect()
-			end
+			rotationSpeed = maxDegreesPerSec
 		end
+
+		local rotationRad = math.rad(rotationSpeed * dt)
+		copy.CFrame = copy.CFrame * CFrame.Angles(0, rotationRad, 0)
 	end)
 
-	-- Activar efectos iguales a lanzar (particle emitters en voidstar original)
-	activateAppearEffects(voidstarOriginal)
-	voidstarOriginal.Transparency = 1
-	task.delay(2, function()
-		voidstarOriginal.Transparency = 0
-	end)
-
-	task.wait(1.2) -- esperar 1.2 segundos antes de acelerar rotación
-
-	-- Rotar hacia la derecha a 2000 grados/s con aceleración en 0.1 s
-	local keepRotateFunc = rotateCopyWithAcceleration(copy, 0.1, 2000)
-
-	task.wait(0.1)
-
-	-- Mantener rotación rápida 0.3 segundos
-	keepRotateFunc(0.3)
-
-	task.wait(0.3)
-
-	-- Desconectar seguimiento para mover libremente
-	if followConnection then
-		followConnection:Disconnect()
-	end
-
-	-- Mover hacia dentro del torso en no más de 0.2 segundos
-	local startCFrame = copy.CFrame
-	local endCFrame = hrp.CFrame
-	local moveDuration = 0.2
-	local moveElapsed = 0
-
-	while moveElapsed < moveDuration do
-		local dt = RunService.Heartbeat:Wait()
-		moveElapsed = moveElapsed + dt
-		local alpha = math.clamp(moveElapsed / moveDuration, 0, 1)
-		copy.CFrame = startCFrame:Lerp(endCFrame, alpha)
-	end
-
-	-- Destruir copia al llegar
-	if copy and copy.Parent then
-		copy:Destroy()
+	return function(duration)
+		task.delay(duration, function()
+			running = false
+		end)
 	end
 end
 
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
 	if gameProcessed then return end
-
 	if input.KeyCode == Enum.KeyCode.R then
-		createCopyAndAnimate()
+		if not voidstarOriginal then return end
+		local hrp = character:FindFirstChild("Torso") or character:FindFirstChild("UpperTorso") or character:FindFirstChild("HumanoidRootPart")
+		if not hrp then return end
+
+		local copy = voidstarOriginal:Clone()
+		copy.Anchored = false
+		copy.CanCollide = false
+		copy.Transparency = 0
+		copy.CFrame = hrp.CFrame * CFrame.new(0, 0, -1.2)
+		copy.Parent = workspace
+
+		-- Hace que la copia siga el torso (sin retardo)
+		local followConnection
+		followConnection = RunService.Heartbeat:Connect(function()
+			if copy.Parent == nil or hrp.Parent == nil then
+				followConnection:Disconnect()
+				return
+			end
+			copy.CFrame = hrp.CFrame * CFrame.new(0, 0, -1.2)
+		end)
+
+		activateAppearEffects(voidstarOriginal)
+
+		-- Esperar 1.2 segundos antes de empezar rotación
+		task.delay(1.2, function()
+			local stopRotation = rotateCopyWithAcceleration(copy, 0.1, 2000)
+			stopRotation(0.3)
+
+			-- Después de 0.3 segundos, dejar de seguir el torso y mover la copia hacia dentro del torso
+			task.delay(0.3, function()
+				followConnection:Disconnect()
+				local goalCFrame = hrp.CFrame
+				local startCFrame = copy.CFrame
+				local travelTime = 0.2
+				local elapsed = 0
+
+				-- Movimiento lineal hacia el torso en 0.2 segundos
+				local moveConnection
+				moveConnection = RunService.Heartbeat:Connect(function(dt)
+					if copy.Parent == nil or hrp.Parent == nil then
+						moveConnection:Disconnect()
+						return
+					end
+					elapsed = elapsed + dt
+					local alpha = math.min(elapsed / travelTime, 1)
+					copy.CFrame = startCFrame:Lerp(goalCFrame, alpha)
+					if alpha >= 1 then
+						moveConnection:Disconnect()
+						copy:Destroy()
+					end
+				end)
+			end)
+		end)
 	end
 end)
