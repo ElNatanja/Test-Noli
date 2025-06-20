@@ -1,4 +1,4 @@
---// VOIDSTAR SCRIPT COMPLETO (MODIFICADO)
+--// VOIDSTAR SCRIPT COMPLETO (MODIFICADO 2)
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -17,7 +17,7 @@ local R6PartNames = {
 
 local meshAttachmentMap = {
     ["NoliHead"] = "Head", ["NoliLeft Arm"] = "Left Arm",
-    ["NoliLeft Leg"] = "Left Leg", -- NO Lower Skull aquí
+    ["NoliLeft Leg"] = "Left Leg",
     ["NoliRight Arm"] = "Right Arm", ["NoliRight Leg"] = "Right Leg",
     ["NoliTorso"] = "Torso", ["Voidstar"] = "Right Arm",
     ["VoidstarCrown"] = "Head"
@@ -90,6 +90,16 @@ local function main()
         if part:IsA("BasePart") and R6PartNames[part.Name] then
             part.Transparency = 1
             part.CanCollide = false
+        end
+    end
+
+    -- HACER INVISIBLE LA CARA DEL JUGADOR
+    local head = character:FindFirstChild("Head")
+    if head then
+        for _, child in ipairs(head:GetChildren()) do
+            if child:IsA("Decal") and child.Name == "face" then
+                child.Transparency = 1
+            end
         end
     end
 
