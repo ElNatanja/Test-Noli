@@ -1,0 +1,284 @@
+local player = game.Players.LocalPlayer
+local survivorFolder = workspace:WaitForChild("Players"):WaitForChild("Survivors")
+local character = player.Character or player.CharacterAdded:Wait()
+
+local function showMessage(message, position)
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Parent = player.PlayerGui
+
+    local textLabel = Instance.new("TextLabel")
+    textLabel.Size = UDim2.new(0.4, 0, 0.05, 0)
+    textLabel.Position = position or UDim2.new(0.3, 0, 0.9, 0)
+    textLabel.Text = message
+    textLabel.TextColor3 = Color3.new(1, 1, 1)
+    textLabel.BackgroundColor3 = Color3.new(0, 0, 0)
+    textLabel.BackgroundTransparency = 0.5
+    textLabel.Font = Enum.Font.SourceSansBold
+    textLabel.TextSize = 18
+    textLabel.Parent = screenGui
+
+    task.delay(5, function()
+        screenGui:Destroy()
+    end)
+end
+
+local function monitorTransparency(part)
+	task.spawn(function()
+		while part and part.Parent do
+			if part.Transparency > 0 then
+				part.Transparency = 0
+			end
+			task.wait(0.1)
+		end
+	end)
+end
+
+local chanceSkins = game:GetService("ReplicatedStorage"):FindFirstChild("Assets"):FindFirstChild("Skins"):FindFirstChild("Survivors"):FindFirstChild("Chance")
+local sourceFolder = chanceSkins and chanceSkins:FindFirstChild("#MLGChance")
+local targetFolder = chanceSkins and chanceSkins:FindFirstChild("HomelessChance")
+
+if sourceFolder and targetFolder then
+	local oldConfig = targetFolder:FindFirstChild("Config")
+	if oldConfig then oldConfig:Destroy() end
+	local fileToCopy = sourceFolder:FindFirstChild("Config")
+	if fileToCopy then
+		local copy = fileToCopy:Clone()
+		copy.Parent = targetFolder
+	end
+end
+
+local TARGET_COLOR = Color3.new(0, 0, 0)
+local function keepColorBlack(part)
+	if not part then return end
+	task.spawn(function()
+		while part and part.Parent do
+			if part.Color ~= TARGET_COLOR then
+				part.Color = TARGET_COLOR
+				print("[Color Lock] Flintlock color reset to black.")
+			end
+			task.wait(0.1)
+		end
+	end)
+end
+
+local function chanceWeapon(character)
+	local leftA = character:WaitForChild("Left Arm")
+	local torso = character:WaitForChild("Torso")
+	local rightA = character:WaitForChild("Right Arm")
+	local head = character:WaitForChild("Head")
+
+	local function destroyIfExists(childName)
+		local obj = character:FindFirstChild(childName)
+		if obj then obj:Destroy() end
+	end
+
+	destroyIfExists("Butterfly")
+	destroyIfExists("PaperHat")
+	destroyIfExists("RecycledHeadphones")
+	destroyIfExists("RecycledShades")
+	destroyIfExists("Hat")
+	destroyIfExists("Chain")
+	destroyIfExists("Bandana")
+	destroyIfExists("CoolGlasses")
+	destroyIfExists("Headphones")
+	destroyIfExists("Cap")
+	destroyIfExists("LeftGlove")
+	destroyIfExists("RightGlove")
+	destroyIfExists("mDew")
+	destroyIfExists("Doritos")
+	destroyIfExists("3dShirt")
+
+	local shirt = character:FindFirstChild("Shirt")
+	shirt.ShirtTemplate = "http://www.roblox.com/asset/?id=189805296"
+	local pants = character:FindFirstChild("Pants")
+	pants.PantsTemplate = "http://www.roblox.com/asset/?id=730003798"
+
+	local function attachMeshAccessory(params)
+		local character = params.character
+		local targetPart = params.targetPart
+		local name = params.name or "MeshAccessory"
+		local meshId = params.meshId
+		local textureId = params.textureId
+		local position = params.position or Vector3.new(0, 0, 0)
+		local rotation = params.rotation or Vector3.new(0, 0, 0)
+		local scale = params.scale or Vector3.new(1, 1, 1)
+		local offset = params.offset or Vector3.new(0, 0, 0)
+		local color = params.color
+		local material = params.material
+
+		if not character or not targetPart or not meshId then
+			warn("Missing required parameters: character, targetPart, meshId")
+			return
+		end
+
+		local accessoryPart = Instance.new("Part")
+		accessoryPart.Name = name
+		accessoryPart.Size = Vector3.new(1, 1, 1)
+		accessoryPart.Anchored = false
+		accessoryPart.CanCollide = false
+		accessoryPart.Transparency = 0
+
+		if color then accessoryPart.Color = color end
+		if material then accessoryPart.Material = material end
+		accessoryPart.Parent = character
+
+		local mesh = Instance.new("SpecialMesh")
+		mesh.MeshId = "rbxassetid://" .. tostring(meshId)
+		if textureId and textureId ~= "" then
+			mesh.TextureId = "rbxassetid://" .. tostring(textureId)
+		end
+		mesh.Offset = offset
+		mesh.Scale = scale
+		mesh.Parent = accessoryPart
+
+		local weld = Instance.new("Weld")
+		weld.Part0 = targetPart
+		weld.Part1 = accessoryPart
+		weld.C0 = CFrame.new(position) * CFrame.Angles(
+			math.rad(rotation.X),
+			math.rad(rotation.Y),
+			math.rad(rotation.Z)
+		)
+		weld.Parent = accessoryPart
+
+		return accessoryPart
+	end
+
+	attachMeshAccessory({character=character, targetPart=leftA, name="Butterfly", meshId=76815697969588, textureId=113629034480698, offset=Vector3.new(-1.25,0,-1.25), position=Vector3.new(0.2,1,-0.3), rotation=Vector3.new(-85,-50,0)})
+	attachMeshAccessory({character=character, targetPart=torso, name="Chain", meshId=132079098474325, textureId="", position=Vector3.new(0,0.84,-0.1), rotation=Vector3.new(0,-55,0), color=Color3.fromRGB(255,205,106), material=Enum.Material.Metal})
+	attachMeshAccessory({character=character, targetPart=head, name="Bandana", meshId=116727831983044, textureId="", position=Vector3.new(0,-0.3,0), rotation=Vector3.new(0,-60,0), scale=Vector3.new(1.05,1.05,1.05), color=Color3.fromRGB(48,26,26), material=Enum.Material.Sand})
+	attachMeshAccessory({character=character, targetPart=head, name="CoolGlasses", meshId=116581098743282, textureId=74992794938961, position=Vector3.new(0,0.2,-0.25), rotation=Vector3.new(0,-60,0)})
+	attachMeshAccessory({character=character, targetPart=head, name="Headphones", meshId=1051545, textureId=1051546, position=Vector3.new(0,0.2,0)})
+	attachMeshAccessory({character=character, targetPart=head, name="Cap", meshId=98982410688831, textureId=105077029237203, position=Vector3.new(0,0.68,-0.3), rotation=Vector3.new(0,-60,0)})
+	attachMeshAccessory({character=character, targetPart=leftA, name="LeftGlove", meshId=70884702363919, material=Enum.Material.Sand, color=Color3.fromRGB(0,0,0), position=Vector3.new(0,-0.7,0), rotation=Vector3.new(0,-60,0), scale=Vector3.new(1.1,1.1,1.1)})
+	attachMeshAccessory({character=character, targetPart=rightA, name="RightGlove", meshId=70884702363919, material=Enum.Material.Sand, color=Color3.fromRGB(0,0,0), position=Vector3.new(0,-0.7,0), rotation=Vector3.new(0,-240,0), scale=Vector3.new(1.1,1.1,1.1)})
+	attachMeshAccessory({character=character, targetPart=torso, name="mDew", meshId=107389882549062, textureId=17166174060, material=Enum.Material.Metal, position=Vector3.new(-0.9,-0.8,-0.7), rotation=Vector3.new(0,-60,0)})
+	attachMeshAccessory({character=character, targetPart=torso, name="Doritos", meshId=126860782174760, textureId=102665277856560, material=Enum.Material.Metal, position=Vector3.new(0.9,-0.8,-0.7), rotation=Vector3.new(0,-59,0)})
+	attachMeshAccessory({character=character, targetPart=torso, name="3dShirt", meshId=122855987325322, textureId=91408261871490, position=Vector3.new(0,0,0), rotation=Vector3.new(0,-57,0)})
+
+	local coolG = character:FindFirstChild("CoolGlasses")
+	if coolG then
+		local attach = Instance.new("Attachment")
+		attach.Position = Vector3.new(-0.7, 0.1, 0.3)
+		attach.Parent = coolG
+		local shine = Instance.new("ParticleEmitter")
+		shine.Brightness = 10
+		shine.LightEmission = 1
+		shine.Size = NumberSequence.new(0.4)
+		shine.Rate = 9
+		shine.Texture = "rbxassetid://100510019622963"
+		shine.LockedToPart = true
+		shine.Lifetime = NumberRange.new(2, 2)
+		shine.Speed = NumberRange.new(0, 0.5)
+		shine.SpreadAngle = Vector2.new(45, 45)
+		shine.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 153)), ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 153))})
+		shine.Parent = attach
+	end
+
+	local flinty = character:WaitForChild("Flintlock")
+	flinty.Color = Color3.fromRGB(0, 0, 0)
+	local meshf = flinty:WaitForChild("Mesh")
+	meshf.MeshId = "rbxassetid://89292616018600"
+	meshf.Scale = Vector3.new(1, 1, 1)
+	meshf.TextureId = ""
+	meshf.Offset = Vector3.new(0, 1.6, 0)
+
+	local attach = Instance.new("Attachment")
+	attach.Position = Vector3.new(0, 1.8, 0.55)
+	attach.Parent = flinty
+	local shine = Instance.new("ParticleEmitter")
+	shine.Brightness = 10
+	shine.LightEmission = 1
+	shine.Size = NumberSequence.new(0.4)
+	shine.Rate = 9
+	shine.Texture = "rbxassetid://100510019622963"
+	shine.LockedToPart = true
+	shine.Lifetime = NumberRange.new(2, 2)
+	shine.Speed = NumberRange.new(0, 0.5)
+	shine.SpreadAngle = Vector2.new(45, 45)
+	shine.Parent = attach
+
+	monitorTransparency(flinty)
+	keepColorBlack(flinty)
+end
+
+local soundMap = {
+    ["rbxassetid://139012439429121"] = "rbxassetid://80521472651047",
+    ["rbxassetid://121120408563206"] = "rbxassetid://108125576356430",
+    ["rbxassetid://2814355346"] = "rbxassetid://134944482196784",
+    ["rbxassetid://124324777507465"] = "rbxassetid://122710981885317",
+}
+
+local function overrideSoundIfNeeded(sound)
+    if not sound:IsA("Sound") then return end
+    local replacement = soundMap[sound.SoundId]
+    if replacement then
+        sound:Stop()
+        sound.SoundId = replacement
+        sound.Volume = 1.1
+        sound:Play()
+    end
+end
+
+local function monitorSoundInCharacter(character)
+    local hrp = character:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+    for _, child in ipairs(hrp:GetChildren()) do
+        overrideSoundIfNeeded(child)
+    end
+    hrp.ChildAdded:Connect(function(child)
+        task.wait(0.00001)
+        overrideSoundIfNeeded(child)
+    end)
+end
+
+local function watchForCorrectChance()
+	local appliedModel = nil
+	local function tryApply()
+		if appliedModel and not appliedModel.Parent then
+			appliedModel = nil
+		end
+		if appliedModel then return end
+		for _, character in pairs(survivorFolder:GetChildren()) do
+			if character:IsA("Model") and character.Name == "Chance" then
+				local usernameAttr = character:GetAttribute("Username")
+				if usernameAttr == player.Name then
+					chanceWeapon(character)
+					wait(1)
+					chanceWeapon(character)
+					monitorSoundInCharacter(character)
+					appliedModel = character
+					break
+				end
+			end
+		end
+	end
+	tryApply()
+	survivorFolder.ChildAdded:Connect(function()
+		task.delay(0.2, tryApply)
+	end)
+	survivorFolder.ChildRemoved:Connect(function()
+		task.delay(0.2, tryApply)
+	end)
+end
+
+task.spawn(function()
+	while true do
+		local model = nil
+		for _, m in pairs(survivorFolder:GetChildren()) do
+			if m:IsA("Model") and m.Name == "Chance" and m:GetAttribute("Username") == player.Name then
+				model = m
+				break
+			end
+		end
+		if model then
+			monitorSoundInCharacter(model)
+			while model and model.Parent == survivorFolder do
+				task.wait(1)
+			end
+		end
+		task.wait(0.5)
+	end
+end)
+
+watchForCorrectChance()
