@@ -1,39 +1,507 @@
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
-
+local UserInputService = game:GetService("UserInputService")
 local player = Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
 
--- Ruta al Rig2
-local rig2 = ReplicatedStorage:FindFirstChild("Assets")
-    and ReplicatedStorage.Assets:FindFirstChild("Killers")
-    and ReplicatedStorage.Assets.Killers:FindFirstChild("#NoliRework")
-    and ReplicatedStorage.Assets.Killers["#NoliRework"]:FindFirstChild("Rig2")
+-- IDs de animaciones y sonidos
+local animSpawnId = "rbxassetid://82002727792391"
+local soundSpawnId = "rbxassetid://102261382920667"
+local animIdleId = "rbxassetid://83465205704188"
+local animWalkId = "rbxassetid://116353529220765"
+local animRunId  = "rbxassetid://117451341682452"
+local animFId = "rbxassetid://109230267448394"
+local soundFId = "rbxassetid://110759725172567"
+local touchingAnimationId = "rbxassetid://140035118771958"
+local eAnimationId = "rbxassetid://112086435391140"
+local gAnimationId = "rbxassetid://99465988880393"
+local touchingSoundId = "rbxassetid://114767134633867"
+local eKeySoundId = "rbxassetid://90768093259753"
+-- K custom mode
+local mainAnimId = "rbxassetid://128923537868786"
+local exitAnimId = "rbxassetid://99164529472582"
+local resumeAnimId = "rbxassetid://122580527125278"
+local mainSoundId = "rbxassetid://115332398454262"
+local exitSoundId = "rbxassetid://113454045849271"
+-- R key
+local animRId = "rbxassetid://128730974312965"
+local soundRId = "rbxassetid://113926551867193"
+-- T key
+local animTId = "rbxassetid://129491851057694"
+local soundTId = "rbxassetid://78344423946580"
+-- C key
+local soundCId = "rbxassetid://79001697227075"
+-- P key (especial R6)
+local animPId = "rbxassetid://89207009102595"
+local soundPId = "rbxassetid://135361916861123"
 
-if not rig2 then
-    warn("No se encontró el modelo Rig2.")
-    return
-end
-
--- Clonar el modelo y parentarlo en Workspace
-local rigClone = rig2:Clone()
-rigClone.Parent = workspace
-
--- Función para actualizar la posición del clon
-local OFFSET = Vector3.new(0, 0, 4) -- 4 studs detrás del jugador
-
-local function updateRigPosition()
-    if character and character:FindFirstChild("HumanoidRootPart") then
-        local hrp = character.HumanoidRootPart
-        local rigHRP = rigClone:FindFirstChild("HumanoidRootPart") or rigClone:FindFirstChildWhichIsA("BasePart")
-        if rigHRP then
-            -- Calcula la posición detrás del jugador
-            local backPosition = hrp.CFrame * CFrame.new(OFFSET)
-            rigHRP.CFrame = CFrame.new(backPosition.Position, hrp.Position)
+local function makeCharacterInvisible(character)
+    local partNames = {"Head", "Torso", "Left Arm", "Left Leg", "Right Arm", "Right Leg"}
+    for _, partName in ipairs(partNames) do
+        local part = character:FindFirstChild(partName)
+        if part and part:IsA("BasePart") then
+            part.Transparency = 1
+            for _, child in ipairs(part:GetChildren()) do
+                if child:IsA("Decal") or child:IsA("Texture") then
+                    child.Transparency = 1
+                end
+            end
+        end
+    end
+    local head = character:FindFirstChild("Head")
+    if head then
+        for _, child in ipairs(head:GetChildren()) do
+            if child:IsA("Decal") or child:IsA("Texture") then
+                child.Transparency = 1
+            end
+        end
+    end
+    for _, acc in ipairs(character:GetChildren()) do
+        if acc:IsA("Accessory") then
+            local handle = acc:FindFirstChild("Handle")
+            if handle and handle:IsA("BasePart") then
+                handle.Transparency = 1
+            end
         end
     end
 end
 
--- Hacer que el modelo siga al jugador en cada frame
-RunService.RenderStepped:Connect(updateRigPosition)
+local function disableAllCollisions(model)
+    task.wait()
+    for _, part in ipairs(model:GetDescendants()) do
+        if part:IsA("BasePart") then
+            part.CanCollide = false
+            part.CanTouch = false
+            part.CanQuery = false
+        end
+    end
+end
+local function forceDisableCollisionOnNamedParts(model)
+    local partNames = {["Head"]=true,["Torso"]=true,["Left Arm"]=true,
+        ["Right Arm"]=true,["Left Leg"]=true,["Right Leg"]=true}
+    for _, descendant in ipairs(model:GetDescendants()) do
+        if descendant:IsA("BasePart") and partNames[descendant.Name] then
+            descendant.CanCollide = false
+            descendant.CanTouch = false
+            descendant.CanQuery = false
+        end
+    end
+end
+
+local function createTracks(humanoid)
+    local idleAnim = Instance.new("Animation") idleAnim.AnimationId = animIdleId
+    local walkAnim = Instance.new("Animation") walkAnim.AnimationId = animWalkId
+    local runAnim  = Instance.new("Animation") runAnim.AnimationId  = animRunId
+    local animator = humanoid:FindFirstChildOfClass("Animator")
+    if not animator then animator = Instance.new("Animator") animator.Parent = humanoid end
+    local idleTrack = animator:LoadAnimation(idleAnim)
+    local walkTrack = animator:LoadAnimation(walkAnim)
+    local runTrack = animator:LoadAnimation(runAnim)
+    return { idle=idleTrack, walk=walkTrack, run=runTrack }
+end
+
+local function playSpawnAnimation(character)
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+    if humanoid then
+        local spawnAnimation = Instance.new("Animation")
+        spawnAnimation.AnimationId = animSpawnId
+        local spawnAnimTrack = humanoid:LoadAnimation(spawnAnimation)
+        local spawnSound = Instance.new("Sound")
+        spawnSound.SoundId = soundSpawnId
+        spawnSound.Volume = 1
+        spawnSound.Looped = false
+        spawnSound.Parent = character
+        spawnSound:Play()
+        spawnAnimTrack:Play()
+    else
+        warn("Humanoide no encontrado en el clon")
+    end
+end
+
+local function setupFAbilityOnClone(clone)
+    local humanoid = clone:FindFirstChildOfClass("Humanoid")
+    if not humanoid then return end
+    local animation = Instance.new("Animation") animation.AnimationId = animFId
+    local animationTrack = humanoid:LoadAnimation(animation)
+    local sound = Instance.new("Sound") sound.SoundId = soundFId sound.Volume = 1 sound.Parent = clone
+    UserInputService.InputBegan:Connect(function(input, gameProcessed)
+        if gameProcessed then return end
+        if input.KeyCode == Enum.KeyCode.F then
+            if animationTrack.IsPlaying then animationTrack:Stop() end
+            animationTrack:Play()
+            task.delay(0.2, function() sound:Play() end)
+        end
+    end)
+end
+
+local isPlayingAnimation = false
+local function playWithRestore(humanoid, character, animationId, soundId, soundDelay)
+    if isPlayingAnimation then return end
+    isPlayingAnimation = true
+    local animation = Instance.new("Animation")
+    animation.AnimationId = animationId
+    local animationTrack = humanoid:LoadAnimation(animation)
+    animationTrack.Priority = Enum.AnimationPriority.Action
+    local otherTracks = {}
+    for _, track in ipairs(humanoid:GetPlayingAnimationTracks()) do
+        if track.Animation and track.Animation.AnimationId ~= animationId then
+            table.insert(otherTracks, track)
+            track:Stop()
+        end
+    end
+    animationTrack:Play()
+    if soundId ~= "" then
+        if soundDelay and soundDelay > 0 then
+            task.delay(soundDelay, function()
+                local delayedSound = Instance.new("Sound")
+                delayedSound.Name = "DelayedSound"
+                delayedSound.SoundId = soundId
+                delayedSound.Volume = 1
+                delayedSound.Parent = character
+                delayedSound:Play()
+                delayedSound.Ended:Connect(function() delayedSound:Destroy() end)
+            end)
+        else
+            local instantSound = Instance.new("Sound")
+            instantSound.Name = "InstantSound"
+            instantSound.SoundId = soundId
+            instantSound.Volume = 1
+            instantSound.Parent = character
+            instantSound:Play()
+            instantSound.Ended:Connect(function() instantSound:Destroy() end)
+        end
+    end
+    animationTrack.Stopped:Wait()
+    for _, track in ipairs(otherTracks) do
+        track:Play()
+    end
+    isPlayingAnimation = false
+end
+local function playAppropriateAnimation(character, keyPressed)
+    if not character then return end
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+    if not humanoid then return end
+    if keyPressed == Enum.KeyCode.Y then
+        playWithRestore(humanoid, character, touchingAnimationId, touchingSoundId)
+    elseif keyPressed == Enum.KeyCode.E then
+        playWithRestore(humanoid, character, eAnimationId, eKeySoundId)
+    elseif keyPressed == Enum.KeyCode.G then
+        playWithRestore(humanoid, character, gAnimationId, eKeySoundId)
+    end
+end
+
+local isPlayingR = false
+local function setupRAbilityOnClone(clone)
+    local humanoid = clone:FindFirstChildOfClass("Humanoid")
+    local rootPart = clone:FindFirstChild("HumanoidRootPart")
+    if not humanoid or not rootPart then return end
+    local animation = Instance.new("Animation")
+    animation.AnimationId = animRId
+    local animationTrack = humanoid:LoadAnimation(animation)
+    local sound = Instance.new("Sound")
+    sound.SoundId = soundRId
+    sound.Volume = 1
+    sound.Parent = rootPart
+    UserInputService.InputBegan:Connect(function(input, gameProcessed)
+        if gameProcessed then return end
+        if input.KeyCode == Enum.KeyCode.R then
+            if isPlayingR then return end
+            isPlayingR = true
+            local otherTracks = {}
+            for _, track in ipairs(humanoid:GetPlayingAnimationTracks()) do
+                if track.Animation and track.Animation.AnimationId ~= animRId then
+                    table.insert(otherTracks, track)
+                    track:Stop()
+                end
+            end
+            if animationTrack.IsPlaying then animationTrack:Stop() end
+            animationTrack:Play()
+            task.delay(0.1, function() sound:Play() end)
+            animationTrack.Stopped:Wait()
+            for _, track in ipairs(otherTracks) do
+                track:Play()
+            end
+            isPlayingR = false
+        end
+    end)
+end
+
+local isPlayingT = false
+local function setupTAbilityOnClone(clone)
+    local humanoid = clone:FindFirstChildOfClass("Humanoid")
+    if not humanoid then return end
+    local animation = Instance.new("Animation")
+    animation.AnimationId = animTId
+    local animationTrack = humanoid:LoadAnimation(animation)
+    local sound = Instance.new("Sound")
+    sound.SoundId = soundTId
+    sound.Parent = clone
+    sound.Volume = 1
+    UserInputService.InputBegan:Connect(function(input, gameProcessed)
+        if gameProcessed then return end
+        if input.KeyCode == Enum.KeyCode.T then
+            if isPlayingT then return end
+            isPlayingT = true
+            local otherTracks = {}
+            for _, track in ipairs(humanoid:GetPlayingAnimationTracks()) do
+                if track.Animation and track.Animation.AnimationId ~= animTId then
+                    table.insert(otherTracks, track)
+                    track:Stop()
+                end
+            end
+            if animationTrack.IsPlaying then animationTrack:Stop() end
+            animationTrack:Play()
+            task.delay(0.2, function() sound:Play() end)
+            animationTrack.Stopped:Wait()
+            for _, track in ipairs(otherTracks) do
+                track:Play()
+            end
+            isPlayingT = false
+        end
+    end)
+end
+
+local function setupCLoopSound(clone)
+    local rootPart = clone:FindFirstChild("HumanoidRootPart")
+    if not rootPart then return end
+    local sound = Instance.new("Sound")
+    sound.SoundId = soundCId
+    sound.Volume = 1
+    sound.Looped = true
+    sound.Name = "CKeySound"
+    sound.Parent = rootPart
+    UserInputService.InputBegan:Connect(function(input, gameProcessed)
+        if gameProcessed then return end
+        if input.KeyCode == Enum.KeyCode.C then
+            if sound.IsPlaying then
+                sound:Stop()
+            else
+                sound:Play()
+            end
+        end
+    end)
+end
+
+-- P: animación y sonido especial (R6)
+local isPlayingP = false
+local savedTracksP = {}
+local function setupPAbilityOnClone(clone)
+    local humanoid = clone:FindFirstChildOfClass("Humanoid")
+    local hrp = clone:FindFirstChild("HumanoidRootPart")
+    if not humanoid or not hrp then return end
+    local specialAnimation = Instance.new("Animation")
+    specialAnimation.AnimationId = animPId
+    local specialSound = Instance.new("Sound")
+    specialSound.SoundId = soundPId
+    specialSound.Volume = 1
+    specialSound.Name = "SpecialSound"
+    specialSound.Parent = hrp
+
+    local function saveAndStopAnimations()
+        savedTracksP = {}
+        for _, track in ipairs(humanoid:GetPlayingAnimationTracks()) do
+            if track and track.IsPlaying and track.Animation.AnimationId ~= specialAnimation.AnimationId then
+                table.insert(savedTracksP, track.Animation)
+                track:Stop(0.1)
+            end
+        end
+    end
+    local function resumeSavedAnimations()
+        for _, animation in ipairs(savedTracksP) do
+            local newTrack = humanoid:LoadAnimation(animation)
+            newTrack:Play()
+        end
+        savedTracksP = {}
+    end
+
+    UserInputService.InputBegan:Connect(function(input, gameProcessed)
+        if gameProcessed then return end
+        if input.KeyCode == Enum.KeyCode.P and not isPlayingP then
+            isPlayingP = true
+            saveAndStopAnimations()
+            local track = humanoid:LoadAnimation(specialAnimation)
+            track:Play()
+            specialSound:Play()
+            track.Stopped:Connect(function()
+                resumeSavedAnimations()
+                isPlayingP = false
+            end)
+        end
+    end)
+end
+
+local isCustomActive = false
+local savedTracksK = {}
+local function setupKAbilityOnClone(clone)
+    local humanoid = clone:FindFirstChildOfClass("Humanoid")
+    if not humanoid then return end
+    local hrp = clone:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+
+    -- Animaciones
+    local mainAnimation = Instance.new("Animation")
+    mainAnimation.AnimationId = mainAnimId
+    local mainTrack = humanoid:LoadAnimation(mainAnimation)
+
+    local exitAnimation = Instance.new("Animation")
+    exitAnimation.AnimationId = exitAnimId
+    local exitTrack = humanoid:LoadAnimation(exitAnimation)
+
+    local resumeAnimation = Instance.new("Animation")
+    resumeAnimation.AnimationId = resumeAnimId
+    local resumeTrack = humanoid:LoadAnimation(resumeAnimation)
+
+    -- Sonidos
+    local mainSound = Instance.new("Sound")
+    mainSound.SoundId = mainSoundId
+    mainSound.Volume = 1
+    mainSound.Name = "MainSound"
+    mainSound.Parent = hrp
+
+    local exitSound = Instance.new("Sound")
+    exitSound.SoundId = exitSoundId
+    exitSound.Volume = 1
+    exitSound.Name = "ExitSound"
+    exitSound.Parent = hrp
+
+    mainTrack.Stopped:Connect(function()
+        if isCustomActive and not exitTrack.IsPlaying and not resumeTrack.IsPlaying then
+            resumeTrack:Play()
+        end
+    end)
+    exitTrack.Stopped:Connect(function()
+        if not isCustomActive then
+            for _, track in ipairs(savedTracksK) do
+                if not track.IsPlaying then
+                    track:Play()
+                end
+            end
+            savedTracksK = {}
+        end
+    end)
+
+    UserInputService.InputBegan:Connect(function(input, gameProcessed)
+        if gameProcessed then return end
+        if input.KeyCode == Enum.KeyCode.K then
+            if not isCustomActive then
+                savedTracksK = {}
+                for _, track in ipairs(humanoid:GetPlayingAnimationTracks()) do
+                    if not (track.Animation.AnimationId == mainAnimId
+                        or track.Animation.AnimationId == exitAnimId
+                        or track.Animation.AnimationId == resumeAnimId) then
+                        table.insert(savedTracksK, track)
+                        track:Stop()
+                    end
+                end
+                if resumeTrack.IsPlaying then resumeTrack:Stop() end
+                if exitTrack.IsPlaying then exitTrack:Stop() end
+                mainTrack:Play()
+                if mainSound.IsPlaying then mainSound:Stop() end
+                mainSound:Play()
+                isCustomActive = true
+            else
+                if mainTrack.IsPlaying then mainTrack:Stop() end
+                if mainSound.IsPlaying then mainSound:Stop() end
+                if resumeTrack.IsPlaying then resumeTrack:Stop() end
+                exitTrack:Play()
+                if exitSound.IsPlaying then exitSound:Stop() end
+                exitSound:Play()
+                isCustomActive = false
+            end
+        end
+    end)
+end
+
+local currentClone
+local function setupFollower(character)
+    local assets = ReplicatedStorage:FindFirstChild("Assets")
+    if not assets then warn("[CLON]: No se encontró Assets en ReplicatedStorage") return end
+    local killers = assets:FindFirstChild("Killers")
+    if not killers then warn("[CLON]: No se encontró Killers en Assets") return end
+    local noli = killers:FindFirstChild("#NoliRework")
+    if not noli then warn("[CLON]: No se encontró #NoliRework en Killers") return end
+    local rig2 = noli:FindFirstChild("Rig2")
+    if not rig2 then warn("[CLON]: No se encontró Rig2 en #NoliRework") return end
+    if character:FindFirstChild("FollowerRig2") then
+        character.FollowerRig2:Destroy()
+    end
+    local clone = rig2:Clone()
+    clone.Name = "FollowerRig2"
+    clone.Parent = character
+    currentClone = clone
+    disableAllCollisions(clone)
+    forceDisableCollisionOnNamedParts(clone)
+    if not clone:FindFirstChild("HumanoidRootPart") then
+        warn("[CLON]: El modelo clonado no tiene HumanoidRootPart")
+        return
+    end
+    clone.PrimaryPart = clone.HumanoidRootPart
+    local followConnection
+    followConnection = RunService.Heartbeat:Connect(function()
+        if character.Parent and clone and clone.PrimaryPart and character:FindFirstChild("HumanoidRootPart") then
+            local root = character.HumanoidRootPart
+            clone:SetPrimaryPartCFrame(root.CFrame)
+        else
+            if followConnection then followConnection:Disconnect() end
+        end
+    end)
+    playSpawnAnimation(clone)
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+    local cloneHumanoid = clone:FindFirstChildOfClass("Humanoid")
+    if not humanoid or not cloneHumanoid then return end
+    local cloneTracks = createTracks(cloneHumanoid)
+    cloneTracks.idle:Play()
+    local cloneCurrentTrack = cloneTracks.idle
+    humanoid.Running:Connect(function(speed)
+        local function play(track)
+            if cloneCurrentTrack ~= track then
+                if cloneCurrentTrack then cloneCurrentTrack:Stop() end
+                track:Play()
+                cloneCurrentTrack = track
+            end
+        end
+        if speed > 16 then
+            play(cloneTracks.run)
+        elseif speed > 1 then
+            play(cloneTracks.walk)
+        else
+            play(cloneTracks.idle)
+        end
+    end)
+    setupFAbilityOnClone(clone)
+    setupKAbilityOnClone(clone)
+    setupRAbilityOnClone(clone)
+    setupTAbilityOnClone(clone)
+    setupCLoopSound(clone)
+    setupPAbilityOnClone(clone)
+    local function cleanup()
+        if followConnection then followConnection:Disconnect() end
+        if clone then clone:Destroy() end
+        currentClone = nil
+    end
+    character.AncestryChanged:Connect(function(_, parent)
+        if not parent then cleanup() end
+    end)
+    if cloneHumanoid then
+        cloneHumanoid.Died:Connect(cleanup)
+    end
+end
+
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    if currentClone and (
+        input.KeyCode == Enum.KeyCode.E or
+        input.KeyCode == Enum.KeyCode.Y or
+        input.KeyCode == Enum.KeyCode.G
+    ) then
+        playAppropriateAnimation(currentClone, input.KeyCode)
+    end
+end)
+
+local function onCharacterAdded(character)
+    makeCharacterInvisible(character)
+    setupFollower(character)
+end
+
+if player.Character then onCharacterAdded(player.Character) end
+player.CharacterAdded:Connect(onCharacterAdded)
