@@ -1,0 +1,39 @@
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+
+-- Ruta al Rig2
+local rig2 = ReplicatedStorage:FindFirstChild("Assets")
+    and ReplicatedStorage.Assets:FindFirstChild("Killers")
+    and ReplicatedStorage.Assets.Killers:FindFirstChild("#NoliRework")
+    and ReplicatedStorage.Assets.Killers["#NoliRework"]:FindFirstChild("Rig2")
+
+if not rig2 then
+    warn("No se encontró el modelo Rig2.")
+    return
+end
+
+-- Clonar el modelo y parentarlo en Workspace
+local rigClone = rig2:Clone()
+rigClone.Parent = workspace
+
+-- Función para actualizar la posición del clon
+local OFFSET = Vector3.new(0, 0, 4) -- 4 studs detrás del jugador
+
+local function updateRigPosition()
+    if character and character:FindFirstChild("HumanoidRootPart") then
+        local hrp = character.HumanoidRootPart
+        local rigHRP = rigClone:FindFirstChild("HumanoidRootPart") or rigClone:FindFirstChildWhichIsA("BasePart")
+        if rigHRP then
+            -- Calcula la posición detrás del jugador
+            local backPosition = hrp.CFrame * CFrame.new(OFFSET)
+            rigHRP.CFrame = CFrame.new(backPosition.Position, hrp.Position)
+        end
+    end
+end
+
+-- Hacer que el modelo siga al jugador en cada frame
+RunService.RenderStepped:Connect(updateRigPosition)
